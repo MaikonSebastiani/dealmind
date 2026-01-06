@@ -125,10 +125,16 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     // Recalculate profit and ROI if financial fields changed
     const purchasePrice = data.purchasePrice ?? Number(existingDeal.purchasePrice);
     const estimatedCosts = data.estimatedCosts ?? Number(existingDeal.estimatedCosts);
+    const monthlyExpenses = data.monthlyExpenses ?? Number(existingDeal.monthlyExpenses);
     const estimatedSalePrice = data.estimatedSalePrice ?? Number(existingDeal.estimatedSalePrice);
+    const estimatedTimeMonths = data.estimatedTimeMonths ?? existingDeal.estimatedTimeMonths;
 
-    const estimatedProfit = estimatedSalePrice - purchasePrice - estimatedCosts;
-    const totalInvestment = purchasePrice + estimatedCosts;
+    // Total monthly expenses over the investment period
+    const totalMonthlyExpenses = monthlyExpenses * estimatedTimeMonths;
+    
+    // Total investment includes purchase + renovation + monthly expenses over time
+    const totalInvestment = purchasePrice + estimatedCosts + totalMonthlyExpenses;
+    const estimatedProfit = estimatedSalePrice - totalInvestment;
     const estimatedROI = (estimatedProfit / totalInvestment) * 100;
 
     const deal = await prisma.deal.update({

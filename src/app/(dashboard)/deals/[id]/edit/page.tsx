@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createDealSchema, type CreateDealInput } from "@/lib/validations/deal";
 import { Input } from "@/components/ui/input";
+import { CurrencyInput } from "@/components/ui/currency-input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -19,6 +20,7 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft } from "lucide-react";
+import { formatCurrency } from "@/lib/i18n/currency";
 
 const PROPERTY_TYPES = [
   { value: "RESIDENTIAL", label: "Residential" },
@@ -27,15 +29,6 @@ const PROPERTY_TYPES = [
   { value: "INDUSTRIAL", label: "Industrial" },
   { value: "MIXED", label: "Mixed Use" },
 ];
-
-function formatCurrency(value: number) {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(value);
-}
 
 interface EditDealPageProps {
   params: Promise<{ id: string }>;
@@ -81,6 +74,7 @@ export default function EditDealPage({ params }: EditDealPageProps) {
           propertyType: deal.propertyType,
           purchasePrice: Number(deal.purchasePrice),
           estimatedCosts: Number(deal.estimatedCosts),
+          monthlyExpenses: Number(deal.monthlyExpenses),
           estimatedSalePrice: Number(deal.estimatedSalePrice),
           estimatedTimeMonths: deal.estimatedTimeMonths,
           notes: deal.notes || "",
@@ -97,9 +91,13 @@ export default function EditDealPage({ params }: EditDealPageProps) {
 
   const purchasePrice = watch("purchasePrice") || 0;
   const estimatedCosts = watch("estimatedCosts") || 0;
+  const monthlyExpenses = watch("monthlyExpenses") || 0;
   const estimatedSalePrice = watch("estimatedSalePrice") || 0;
+  const estimatedTimeMonths = watch("estimatedTimeMonths") || 12;
 
-  const totalInvestment = purchasePrice + estimatedCosts;
+  // Calculate total monthly expenses over investment period
+  const totalMonthlyExpenses = monthlyExpenses * estimatedTimeMonths;
+  const totalInvestment = purchasePrice + estimatedCosts + totalMonthlyExpenses;
   const estimatedProfit = estimatedSalePrice - totalInvestment;
   const estimatedROI = totalInvestment > 0 ? (estimatedProfit / totalInvestment) * 100 : 0;
 
@@ -252,53 +250,43 @@ export default function EditDealPage({ params }: EditDealPageProps) {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-1.5">
-                  <Label htmlFor="purchasePrice">Purchase Price ($)</Label>
-                  <input
-                    id="purchasePrice"
-                    type="number"
-                    min="0"
-                    step="1000"
-                    className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary disabled:cursor-not-allowed disabled:opacity-50"
-                    placeholder="250000"
-                    {...register("purchasePrice", { valueAsNumber: true })}
-                  />
-                  {errors.purchasePrice && (
-                    <p className="text-sm text-destructive">{errors.purchasePrice.message}</p>
-                  )}
-                </div>
+                <CurrencyInput
+                  id="purchasePrice"
+                  label="Purchase Price"
+                  placeholder="$ 250,000.00"
+                  value={watch("purchasePrice")}
+                  onValueChange={(value) => setValue("purchasePrice", value, { shouldValidate: true })}
+                  error={errors.purchasePrice?.message}
+                />
 
-                <div className="space-y-1.5">
-                  <Label htmlFor="estimatedCosts">Estimated Costs ($)</Label>
-                  <input
-                    id="estimatedCosts"
-                    type="number"
-                    min="0"
-                    step="1000"
-                    className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary disabled:cursor-not-allowed disabled:opacity-50"
-                    placeholder="50000"
-                    {...register("estimatedCosts", { valueAsNumber: true })}
-                  />
-                  {errors.estimatedCosts && (
-                    <p className="text-sm text-destructive">{errors.estimatedCosts.message}</p>
-                  )}
-                </div>
+                <CurrencyInput
+                  id="estimatedCosts"
+                  label="Renovation/Repair Costs"
+                  placeholder="$ 50,000.00"
+                  value={watch("estimatedCosts")}
+                  onValueChange={(value) => setValue("estimatedCosts", value, { shouldValidate: true })}
+                  error={errors.estimatedCosts?.message}
+                  description="One-time costs (renovation, repairs, closing)"
+                />
 
-                <div className="space-y-1.5">
-                  <Label htmlFor="estimatedSalePrice">Estimated Sale Price ($)</Label>
-                  <input
-                    id="estimatedSalePrice"
-                    type="number"
-                    min="0"
-                    step="1000"
-                    className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary disabled:cursor-not-allowed disabled:opacity-50"
-                    placeholder="350000"
-                    {...register("estimatedSalePrice", { valueAsNumber: true })}
-                  />
-                  {errors.estimatedSalePrice && (
-                    <p className="text-sm text-destructive">{errors.estimatedSalePrice.message}</p>
-                  )}
-                </div>
+                <CurrencyInput
+                  id="monthlyExpenses"
+                  label="Monthly Expenses"
+                  placeholder="$ 500.00"
+                  value={watch("monthlyExpenses")}
+                  onValueChange={(value) => setValue("monthlyExpenses", value, { shouldValidate: true })}
+                  error={errors.monthlyExpenses?.message}
+                  description="HOA, taxes, insurance, maintenance"
+                />
+
+                <CurrencyInput
+                  id="estimatedSalePrice"
+                  label="Estimated Sale Price"
+                  placeholder="$ 350,000.00"
+                  value={watch("estimatedSalePrice")}
+                  onValueChange={(value) => setValue("estimatedSalePrice", value, { shouldValidate: true })}
+                  error={errors.estimatedSalePrice?.message}
+                />
 
                 <div className="space-y-1.5">
                   <Label htmlFor="estimatedTimeMonths">Timeline (months)</Label>
@@ -314,6 +302,7 @@ export default function EditDealPage({ params }: EditDealPageProps) {
                   {errors.estimatedTimeMonths && (
                     <p className="text-sm text-destructive">{errors.estimatedTimeMonths.message}</p>
                   )}
+                  <p className="text-xs text-muted-foreground">Used to calculate total monthly expenses</p>
                 </div>
               </div>
             </CardContent>
@@ -365,8 +354,12 @@ export default function EditDealPage({ params }: EditDealPageProps) {
                   <span>{formatCurrency(purchasePrice)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">+ Estimated Costs</span>
+                  <span className="text-muted-foreground">+ Renovation Costs</span>
                   <span>{formatCurrency(estimatedCosts)}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">+ Monthly ({formatCurrency(monthlyExpenses)} × {estimatedTimeMonths}mo)</span>
+                  <span>{formatCurrency(totalMonthlyExpenses)}</span>
                 </div>
                 <div className="border-t pt-2 flex justify-between font-medium">
                   <span>Total Investment</span>

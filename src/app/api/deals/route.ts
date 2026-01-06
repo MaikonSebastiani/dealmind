@@ -32,10 +32,13 @@ export async function POST(request: Request) {
 
     const data = result.data;
 
-    const estimatedProfit = 
-      data.estimatedSalePrice - data.purchasePrice - (data.estimatedCosts || 0);
+    // Calculate total monthly expenses over the investment period
+    const totalMonthlyExpenses = (data.monthlyExpenses || 0) * (data.estimatedTimeMonths || 12);
     
-    const totalInvestment = data.purchasePrice + (data.estimatedCosts || 0);
+    // Total investment = purchase + renovation costs + monthly expenses over time
+    const totalInvestment = data.purchasePrice + (data.estimatedCosts || 0) + totalMonthlyExpenses;
+    
+    const estimatedProfit = data.estimatedSalePrice - totalInvestment;
     const estimatedROI = (estimatedProfit / totalInvestment) * 100;
 
     const deal = await prisma.deal.create({
@@ -43,9 +46,11 @@ export async function POST(request: Request) {
         userId: session.user.id,
         name: data.name,
         address: data.address,
+        zipCode: data.zipCode,
         propertyType: data.propertyType,
         purchasePrice: data.purchasePrice,
         estimatedCosts: data.estimatedCosts || 0,
+        monthlyExpenses: data.monthlyExpenses || 0,
         estimatedSalePrice: data.estimatedSalePrice,
         estimatedTimeMonths: data.estimatedTimeMonths || 12,
         notes: data.notes,

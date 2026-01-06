@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, Pencil, Trash2, MapPin, Calendar, Building } from "lucide-react";
 import { DeleteDealButton } from "./delete-button";
+import { formatCurrency as formatCurrencyBase } from "@/lib/i18n/currency";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -32,12 +33,7 @@ const PROPERTY_TYPE_LABELS = {
 
 function formatCurrency(value: number | null) {
   if (value === null) return "-";
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(value);
+  return formatCurrencyBase(value);
 }
 
 function formatPercent(value: number | null) {
@@ -75,7 +71,8 @@ export default async function DealPage({ params }: PageProps) {
   }
 
   const statusConfig = STATUS_CONFIG[deal.status];
-  const totalInvestment = Number(deal.purchasePrice) + Number(deal.estimatedCosts);
+  const totalMonthlyExpenses = Number(deal.monthlyExpenses) * deal.estimatedTimeMonths;
+  const totalInvestment = Number(deal.purchasePrice) + Number(deal.estimatedCosts) + totalMonthlyExpenses;
 
   return (
     <div className="space-y-6">
@@ -171,8 +168,14 @@ export default async function DealPage({ params }: PageProps) {
               <span className="font-medium">{formatCurrency(Number(deal.purchasePrice))}</span>
             </div>
             <div className="flex justify-between py-2 border-b">
-              <span className="text-muted-foreground">Estimated Costs</span>
+              <span className="text-muted-foreground">Renovation Costs</span>
               <span className="font-medium">{formatCurrency(Number(deal.estimatedCosts))}</span>
+            </div>
+            <div className="flex justify-between py-2 border-b">
+              <span className="text-muted-foreground">
+                Monthly Expenses ({formatCurrency(Number(deal.monthlyExpenses))} × {deal.estimatedTimeMonths}mo)
+              </span>
+              <span className="font-medium">{formatCurrency(totalMonthlyExpenses)}</span>
             </div>
             <div className="flex justify-between py-2 border-b">
               <span className="font-medium">Total Investment</span>

@@ -13,6 +13,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Plus, Eye, Pencil } from "lucide-react";
+import { formatCurrency as formatCurrencyBase } from "@/lib/i18n/currency";
 
 const STATUS_CONFIG = {
   ANALYZING: { label: "Analyzing", variant: "secondary" as const },
@@ -34,12 +35,7 @@ const PROPERTY_TYPE_LABELS = {
 
 function formatCurrency(value: number | null) {
   if (value === null) return "-";
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(value);
+  return formatCurrencyBase(value);
 }
 
 function formatPercent(value: number | null) {

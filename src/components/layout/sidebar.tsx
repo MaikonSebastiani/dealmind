@@ -13,6 +13,15 @@ const navItems = [
 export function Sidebar() {
   const pathname = usePathname();
 
+  // Check if current path matches nav item
+  // Root "/" needs exact match, others use prefix match
+  const isActiveRoute = (href: string) => {
+    if (href === "/") {
+      return pathname === "/";
+    }
+    return pathname === href || pathname.startsWith(`${href}/`);
+  };
+
   return (
     <aside 
       className="flex h-full w-64 flex-col border-r bg-muted/30"
@@ -24,7 +33,7 @@ export function Sidebar() {
       >
         <ul role="list" className="space-y-1">
           {navItems.map((item) => {
-            const isActive = pathname === item.href;
+            const isActive = isActiveRoute(item.href);
             return (
               <li key={item.href}>
                 <Link
@@ -51,11 +60,11 @@ export function Sidebar() {
       <div className="border-t p-4">
         <Link
           href="/settings"
-          aria-current={pathname === "/settings" ? "page" : undefined}
+          aria-current={isActiveRoute("/settings") ? "page" : undefined}
           className={cn(
             "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
             "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1",
-            pathname === "/settings"
+            isActiveRoute("/settings")
               ? "bg-primary text-primary-foreground"
               : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
           )}

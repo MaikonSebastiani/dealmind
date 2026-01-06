@@ -30,6 +30,10 @@ export const createDealSchema = z.object({
   estimatedCosts: z
     .number()
     .min(0, "Costs cannot be negative"),
+  monthlyExpenses: z
+    .number()
+    .min(0, "Monthly expenses cannot be negative")
+    .max(9999999, "Monthly expenses is too high"),
   estimatedSalePrice: z
     .number()
     .positive("Sale price must be positive")
