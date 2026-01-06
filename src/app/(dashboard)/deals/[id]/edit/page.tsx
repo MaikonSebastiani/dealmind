@@ -77,6 +77,7 @@ export default function EditDealPage({ params }: EditDealPageProps) {
         reset({
           name: deal.name,
           address: deal.address || "",
+          zipCode: deal.zipCode || "",
           propertyType: deal.propertyType,
           purchasePrice: Number(deal.purchasePrice),
           estimatedCosts: Number(deal.estimatedCosts),
@@ -202,13 +203,24 @@ export default function EditDealPage({ params }: EditDealPageProps) {
                 {...register("name")}
               />
 
-              <Input
-                id="address"
-                label="Address"
-                placeholder="e.g., 123 Main St, City, State"
-                error={errors.address?.message}
-                {...register("address")}
-              />
+              <div className="grid gap-4 sm:grid-cols-3">
+                <div className="sm:col-span-2">
+                  <Input
+                    id="address"
+                    label="Address"
+                    placeholder="e.g., 123 Main St, City, State"
+                    error={errors.address?.message}
+                    {...register("address")}
+                  />
+                </div>
+                <Input
+                  id="zipCode"
+                  label="ZIP Code"
+                  placeholder="e.g., 12345-678"
+                  error={errors.zipCode?.message}
+                  {...register("zipCode")}
+                />
+              </div>
 
               <div className="space-y-1.5">
                 <Label htmlFor="propertyType">Property Type</Label>

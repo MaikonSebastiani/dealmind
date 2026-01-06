@@ -103,6 +103,7 @@ model Deal {
   // Basic Info
   name               String
   address            String?
+  zipCode            String?
   propertyType       PropertyType @default(RESIDENTIAL)
   status             DealStatus   @default(ANALYZING)
   

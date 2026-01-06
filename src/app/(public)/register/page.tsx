@@ -134,7 +134,7 @@ export default function RegisterPage() {
             type="submit"
             disabled={isSubmitting}
             aria-busy={isSubmitting}
-            className="w-full rounded-lg bg-indigo-600 px-4 py-2.5 text-white font-medium hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+            className="w-full rounded-lg bg-primary px-4 py-2.5 text-primary-foreground font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
           >
             {isSubmitting ? "Creating account..." : "Create Account"}
           </button>
@@ -144,7 +144,7 @@ export default function RegisterPage() {
           Already have an account?{" "}
           <Link 
             href="/login" 
-            className="text-indigo-600 hover:underline focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 rounded"
+            className="text-primary hover:underline focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 rounded"
           >
             Sign in
           </Link>

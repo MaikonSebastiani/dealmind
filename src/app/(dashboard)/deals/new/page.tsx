@@ -52,6 +52,7 @@ export default function NewDealPage() {
     defaultValues: {
       name: "",
       address: "",
+      zipCode: "",
       propertyType: "RESIDENTIAL",
       purchasePrice: 0,
       estimatedCosts: 0,
@@ -138,13 +139,24 @@ export default function NewDealPage() {
                 {...register("name")}
               />
 
-              <Input
-                id="address"
-                label="Address"
-                placeholder="e.g., 123 Main St, City, State"
-                error={errors.address?.message}
-                {...register("address")}
-              />
+              <div className="grid gap-4 sm:grid-cols-3">
+                <div className="sm:col-span-2">
+                  <Input
+                    id="address"
+                    label="Address"
+                    placeholder="e.g., 123 Main St, City, State"
+                    error={errors.address?.message}
+                    {...register("address")}
+                  />
+                </div>
+                <Input
+                  id="zipCode"
+                  label="ZIP Code"
+                  placeholder="e.g., 12345-678"
+                  error={errors.zipCode?.message}
+                  {...register("zipCode")}
+                />
+              </div>
 
               <div className="space-y-1.5">
                 <Label htmlFor="propertyType">Property Type</Label>

@@ -11,6 +11,11 @@ export const createDealSchema = z.object({
     .max(200, "Address must be less than 200 characters")
     .optional()
     .or(z.literal("")),
+  zipCode: z
+    .string()
+    .max(20, "ZIP code must be less than 20 characters")
+    .optional()
+    .or(z.literal("")),
   propertyType: z.enum([
     "RESIDENTIAL",
     "COMMERCIAL", 
