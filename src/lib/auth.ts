@@ -11,9 +11,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
   ],
-//   pages: {
-//     signIn: '/login',
-//   },
+  pages: {
+    signIn: '/login',
+  },
   callbacks: {
     session({ session, user }) {
       if (session.user) {
