@@ -14,14 +14,23 @@ export default function ErrorBoundary({ error, reset }: ErrorBoundaryProps) {
   }, [error]);
 
   return (
-    <div className="flex min-h-[400px] flex-col items-center justify-center gap-4 p-8">
-      <div className="rounded-full bg-destructive/10 p-4">
+    <div 
+      className="flex min-h-[400px] flex-col items-center justify-center gap-4 p-8"
+      role="alert"
+      aria-live="assertive"
+      aria-labelledby="error-heading"
+    >
+      <div 
+        className="rounded-full bg-destructive/10 p-4"
+        aria-hidden="true"
+      >
         <svg
           className="h-8 w-8 text-destructive"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
           strokeWidth={2}
+          aria-hidden="true"
         >
           <path
             strokeLinecap="round"
@@ -32,7 +41,10 @@ export default function ErrorBoundary({ error, reset }: ErrorBoundaryProps) {
       </div>
       
       <div className="text-center">
-        <h2 className="text-xl font-semibold text-foreground">
+        <h2 
+          id="error-heading"
+          className="text-xl font-semibold text-foreground"
+        >
           Something went wrong!
         </h2>
         <p className="mt-2 text-sm text-muted-foreground max-w-md">
@@ -40,18 +52,19 @@ export default function ErrorBoundary({ error, reset }: ErrorBoundaryProps) {
         </p>
         {error.digest && (
           <p className="mt-1 text-xs text-muted-foreground">
-            Error ID: {error.digest}
+            <span className="sr-only">Error ID: </span>
+            {error.digest}
           </p>
         )}
       </div>
 
       <button
         onClick={reset}
-        className="mt-4 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+        className="mt-4 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+        aria-label="Try loading the page again"
       >
         Try again
       </button>
     </div>
   );
 }
-

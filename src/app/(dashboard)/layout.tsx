@@ -1,5 +1,6 @@
 import { Header } from "@/components/layout/header";
 import { Sidebar } from "@/components/layout/sidebar";
+import { SkipLink } from "@/components/layout/skip-link";
 
 export default function DashboardLayout({
   children,
@@ -8,6 +9,8 @@ export default function DashboardLayout({
 }) {
   return (
     <div className="flex h-screen flex-col">
+      <SkipLink />
+      
       {/* Header - full width at top */}
       <Header />
 
@@ -16,7 +19,13 @@ export default function DashboardLayout({
         <Sidebar />
 
         {/* Main content - fills remaining space */}
-        <main className="flex-1 overflow-y-auto p-6">
+        <main 
+          id="main-content"
+          className="flex-1 overflow-y-auto p-6"
+          role="main"
+          aria-label="Main content"
+          tabIndex={-1}
+        >
           {children}
         </main>
       </div>

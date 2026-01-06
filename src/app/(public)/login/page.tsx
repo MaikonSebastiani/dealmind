@@ -54,9 +54,15 @@ function LoginForm() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="w-full max-w-md space-y-8 rounded-xl border bg-card p-8 shadow-lg">
+      <main 
+        className="w-full max-w-md space-y-8 rounded-xl border bg-card p-8 shadow-lg"
+        role="main"
+        aria-labelledby="login-heading"
+      >
         <div className="text-center">
-          <h1 className="text-3xl font-bold tracking-tight">DEALMIND</h1>
+          <h1 id="login-heading" className="text-3xl font-bold tracking-tight">
+            DEALMIND
+          </h1>
           <p className="mt-2 text-muted-foreground">
             Sign in to analyze your real estate deals
           </p>
@@ -64,32 +70,51 @@ function LoginForm() {
 
         {/* Success message after registration */}
         {justRegistered && (
-          <div className="rounded-lg bg-green-50 border border-green-200 p-3 text-sm text-green-600 flex items-center gap-2">
-            <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+          <div 
+            role="status"
+            aria-live="polite"
+            className="rounded-lg bg-green-50 border border-green-200 p-3 text-sm text-green-700 flex items-center gap-2"
+          >
+            <svg 
+              aria-hidden="true"
+              className="h-4 w-4 flex-shrink-0" 
+              fill="currentColor" 
+              viewBox="0 0 20 20"
+            >
               <path
                 fillRule="evenodd"
                 d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
                 clipRule="evenodd"
               />
             </svg>
-            Account created successfully! Please sign in.
+            <span>Account created successfully! Please sign in.</span>
           </div>
         )}
 
         {/* General error */}
         {generalError && (
-          <div className="rounded-lg bg-red-50 border border-red-200 p-3 text-sm text-red-600">
+          <div 
+            role="alert"
+            aria-live="assertive"
+            className="rounded-lg bg-red-50 border border-red-200 p-3 text-sm text-red-700"
+          >
             {generalError}
           </div>
         )}
 
         {/* Email/Password Form */}
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <form 
+          onSubmit={handleSubmit(onSubmit)} 
+          className="space-y-4"
+          noValidate
+          aria-label="Sign in form"
+        >
           <Input
             id="email"
             type="email"
             label="Email"
             placeholder="you@example.com"
+            autoComplete="email"
             error={errors.email?.message}
             {...register("email")}
           />
@@ -99,6 +124,7 @@ function LoginForm() {
             type="password"
             label="Password"
             placeholder="••••••••"
+            autoComplete="current-password"
             error={errors.password?.message}
             {...register("password")}
           />
@@ -106,14 +132,15 @@ function LoginForm() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full rounded-lg bg-indigo-600 px-4 py-2 text-white font-medium hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            aria-busy={isSubmitting}
+            className="w-full rounded-lg bg-indigo-600 px-4 py-2.5 text-white font-medium hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
           >
             {isSubmitting ? "Signing in..." : "Sign In"}
           </button>
         </form>
 
-        {/* Divider */}
-        <div className="relative">
+        {/* Divider - decorative */}
+        <div className="relative" aria-hidden="true">
           <div className="absolute inset-0 flex items-center">
             <div className="w-full border-t" />
           </div>
@@ -126,9 +153,13 @@ function LoginForm() {
         <button
           type="button"
           onClick={handleGoogleSignIn}
-          className="flex w-full items-center justify-center gap-3 rounded-lg border bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50"
+          className="flex w-full items-center justify-center gap-3 rounded-lg border bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
         >
-          <svg className="h-5 w-5" viewBox="0 0 24 24">
+          <svg 
+            aria-hidden="true"
+            className="h-5 w-5" 
+            viewBox="0 0 24 24"
+          >
             <path
               fill="#4285F4"
               d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -146,16 +177,19 @@ function LoginForm() {
               d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
             />
           </svg>
-          Continue with Google
+          <span>Continue with Google</span>
         </button>
 
         <p className="text-center text-sm text-muted-foreground">
           Don&apos;t have an account?{" "}
-          <Link href="/register" className="text-indigo-600 hover:underline">
+          <Link 
+            href="/register" 
+            className="text-indigo-600 hover:underline focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 rounded"
+          >
             Create one
           </Link>
         </p>
-      </div>
+      </main>
     </div>
   );
 }
@@ -165,7 +199,11 @@ export default function LoginPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex min-h-screen items-center justify-center">
+        <div 
+          className="flex min-h-screen items-center justify-center"
+          role="status"
+          aria-label="Loading"
+        >
           <div className="text-muted-foreground">Loading...</div>
         </div>
       }

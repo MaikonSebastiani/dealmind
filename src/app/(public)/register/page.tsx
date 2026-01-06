@@ -61,25 +61,41 @@ export default function RegisterPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="w-full max-w-md space-y-8 rounded-xl border bg-card p-8 shadow-lg">
+      <main 
+        className="w-full max-w-md space-y-8 rounded-xl border bg-card p-8 shadow-lg"
+        role="main"
+        aria-labelledby="register-heading"
+      >
         <div className="text-center">
-          <h1 className="text-3xl font-bold tracking-tight">DEALMIND</h1>
+          <h1 id="register-heading" className="text-3xl font-bold tracking-tight">
+            DEALMIND
+          </h1>
           <p className="mt-2 text-muted-foreground">Create your account</p>
         </div>
 
         {/* General error */}
         {generalError && (
-          <div className="rounded-lg bg-red-50 border border-red-200 p-3 text-sm text-red-600">
+          <div 
+            role="alert"
+            aria-live="assertive"
+            className="rounded-lg bg-red-50 border border-red-200 p-3 text-sm text-red-700"
+          >
             {generalError}
           </div>
         )}
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <form 
+          onSubmit={handleSubmit(onSubmit)} 
+          className="space-y-4"
+          noValidate
+          aria-label="Create account form"
+        >
           <Input
             id="name"
             type="text"
             label="Name"
             placeholder="John Doe"
+            autoComplete="name"
             error={errors.name?.message}
             {...register("name")}
           />
@@ -89,6 +105,7 @@ export default function RegisterPage() {
             type="email"
             label="Email"
             placeholder="you@example.com"
+            autoComplete="email"
             error={errors.email?.message}
             {...register("email")}
           />
@@ -98,6 +115,7 @@ export default function RegisterPage() {
             type="password"
             label="Password"
             placeholder="••••••••"
+            autoComplete="new-password"
             error={errors.password?.message}
             {...register("password")}
           />
@@ -107,6 +125,7 @@ export default function RegisterPage() {
             type="password"
             label="Confirm Password"
             placeholder="••••••••"
+            autoComplete="new-password"
             error={errors.confirmPassword?.message}
             {...register("confirmPassword")}
           />
@@ -114,7 +133,8 @@ export default function RegisterPage() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full rounded-lg bg-indigo-600 px-4 py-2 text-white font-medium hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            aria-busy={isSubmitting}
+            className="w-full rounded-lg bg-indigo-600 px-4 py-2.5 text-white font-medium hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
           >
             {isSubmitting ? "Creating account..." : "Create Account"}
           </button>
@@ -122,11 +142,14 @@ export default function RegisterPage() {
 
         <p className="text-center text-sm text-muted-foreground">
           Already have an account?{" "}
-          <Link href="/login" className="text-indigo-600 hover:underline">
+          <Link 
+            href="/login" 
+            className="text-indigo-600 hover:underline focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 rounded"
+          >
             Sign in
           </Link>
         </p>
-      </div>
+      </main>
     </div>
   );
 }
