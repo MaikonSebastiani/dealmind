@@ -8,6 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { createDealSchema, type CreateDealInput } from "@/lib/validations/deal";
 import { Input } from "@/components/ui/input";
 import { CurrencyInput } from "@/components/ui/currency-input";
+import { ZipCodeInput } from "@/components/ui/zipcode-input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -211,12 +212,11 @@ export default function EditDealPage({ params }: EditDealPageProps) {
                     {...register("address")}
                   />
                 </div>
-                <Input
+                <ZipCodeInput
                   id="zipCode"
-                  label="ZIP Code"
-                  placeholder="e.g., 12345-678"
+                  value={watch("zipCode") || ""}
+                  onChange={(value) => setValue("zipCode", value)}
                   error={errors.zipCode?.message}
-                  {...register("zipCode")}
                 />
               </div>
 
