@@ -4,17 +4,18 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Home, FileText, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-const navItems = [
-  { href: "/", label: "Dashboard", icon: Home },
-  { href: "/deals", label: "Deals", icon: FileText },
-];
+import { useLocale } from "@/contexts/locale-context";
 
 export function Sidebar() {
   const pathname = usePathname();
+  const { t } = useLocale();
+
+  const navItems = [
+    { href: "/", label: t("nav.dashboard"), icon: Home },
+    { href: "/deals", label: t("nav.deals"), icon: FileText },
+  ];
 
   // Check if current path matches nav item
-  // Root "/" needs exact match, others use prefix match
   const isActiveRoute = (href: string) => {
     if (href === "/") {
       return pathname === "/";
@@ -70,7 +71,7 @@ export function Sidebar() {
           )}
         >
           <Settings className="h-5 w-5" aria-hidden="true" />
-          <span>Settings</span>
+          <span>{t("nav.settings")}</span>
         </Link>
       </div>
     </aside>

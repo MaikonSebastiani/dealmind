@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { updateDealSchema, updateDealStatusSchema } from "@/lib/validations/deal";
+import { calculateDealMetrics } from "@/lib/calculations/financing";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -122,27 +123,42 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
     const data = result.data;
 
-    // Recalculate profit and ROI if financial fields changed
+    // Merge with existing data for calculation
     const purchasePrice = data.purchasePrice ?? Number(existingDeal.purchasePrice);
     const estimatedCosts = data.estimatedCosts ?? Number(existingDeal.estimatedCosts);
     const monthlyExpenses = data.monthlyExpenses ?? Number(existingDeal.monthlyExpenses);
     const estimatedSalePrice = data.estimatedSalePrice ?? Number(existingDeal.estimatedSalePrice);
     const estimatedTimeMonths = data.estimatedTimeMonths ?? existingDeal.estimatedTimeMonths;
+    const useFinancing = data.useFinancing ?? existingDeal.useFinancing;
+    const downPayment = data.downPayment ?? (existingDeal.downPayment ? Number(existingDeal.downPayment) : 0);
+    const interestRate = data.interestRate ?? (existingDeal.interestRate ? Number(existingDeal.interestRate) : 0);
+    const loanTermYears = data.loanTermYears ?? existingDeal.loanTermYears ?? 30;
+    const closingCosts = data.closingCosts ?? (existingDeal.closingCosts ? Number(existingDeal.closingCosts) : 0);
 
-    // Total monthly expenses over the investment period
-    const totalMonthlyExpenses = monthlyExpenses * estimatedTimeMonths;
-    
-    // Total investment includes purchase + renovation + monthly expenses over time
-    const totalInvestment = purchasePrice + estimatedCosts + totalMonthlyExpenses;
-    const estimatedProfit = estimatedSalePrice - totalInvestment;
-    const estimatedROI = (estimatedProfit / totalInvestment) * 100;
+    // Use centralized calculation utility
+    const metrics = calculateDealMetrics({
+      purchasePrice,
+      estimatedCosts,
+      monthlyExpenses,
+      estimatedSalePrice,
+      estimatedTimeMonths,
+      useFinancing,
+      downPayment,
+      interestRate,
+      loanTermYears,
+      closingCosts,
+    });
 
     const deal = await prisma.deal.update({
       where: { id },
       data: {
         ...data,
-        estimatedProfit,
-        estimatedROI,
+        // Financing fields (only if using financing)
+        loanAmount: useFinancing ? metrics.loanAmount : null,
+        monthlyPayment: useFinancing ? metrics.monthlyPayment : null,
+        // Calculated fields
+        estimatedProfit: metrics.estimatedProfit,
+        estimatedROI: metrics.estimatedROI,
       },
     });
 
@@ -205,4 +221,3 @@ export async function DELETE(request: Request, { params }: RouteParams) {
     );
   }
 }
-
