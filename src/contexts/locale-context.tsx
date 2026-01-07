@@ -33,6 +33,11 @@ const translations: Record<LocaleCode, Record<string, string>> = {
     "common.creating": "Creating...",
     "common.yes": "Yes",
     "common.no": "No",
+    "common.error": "Something went wrong. Please try again.",
+    
+    // Deal errors
+    "deal.notFound": "Deal not found",
+    "deal.propertyType.select": "Select property type",
     
     // Deal Form - Basic Info
     "deal.title.new": "New Deal",
@@ -154,6 +159,11 @@ const translations: Record<LocaleCode, Record<string, string>> = {
     "common.creating": "Criando...",
     "common.yes": "Sim",
     "common.no": "Não",
+    "common.error": "Algo deu errado. Por favor, tente novamente.",
+    
+    // Deal errors
+    "deal.notFound": "Negócio não encontrado",
+    "deal.propertyType.select": "Selecione o tipo de imóvel",
     
     // Deal Form - Basic Info
     "deal.title.new": "Novo Negócio",

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Table,
   TableBody,
@@ -11,7 +12,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Plus, Eye, Pencil } from "lucide-react";
+import { Plus, ChevronRight } from "lucide-react";
 import { useLocale } from "@/contexts/locale-context";
 import { formatCurrency } from "@/lib/i18n/currency";
 
@@ -31,6 +32,7 @@ interface DealsPageClientProps {
 }
 
 export function DealsPageClient({ deals }: DealsPageClientProps) {
+  const router = useRouter();
   const { t, locale } = useLocale();
 
   const STATUS_CONFIG: Record<string, { label: string; variant: "default" | "secondary" | "destructive" }> = {
@@ -59,6 +61,10 @@ export function DealsPageClient({ deals }: DealsPageClientProps) {
   const formatPercent = (value: number | null) => {
     if (value === null) return "-";
     return `${value.toFixed(1)}%`;
+  };
+
+  const handleRowClick = (dealId: string) => {
+    router.push(`/deals/${dealId}`);
   };
 
   return (
@@ -109,26 +115,36 @@ export function DealsPageClient({ deals }: DealsPageClientProps) {
                 <TableHead className="text-right">{t("deals.table.investment")}</TableHead>
                 <TableHead className="text-right">{t("deals.table.roi")}</TableHead>
                 <TableHead className="text-right">{t("deals.table.profit")}</TableHead>
-                <TableHead className="sr-only">{t("deals.table.actions")}</TableHead>
+                <TableHead className="w-10"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {deals.map((deal) => {
                 const statusConfig = STATUS_CONFIG[deal.status] || STATUS_CONFIG.ANALYZING;
                 return (
-                  <TableRow key={deal.id}>
+                  <TableRow 
+                    key={deal.id}
+                    onClick={() => handleRowClick(deal.id)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        handleRowClick(deal.id);
+                      }
+                    }}
+                    tabIndex={0}
+                    role="link"
+                    aria-label={`${locale === "pt-BR" ? "Ver detalhes de" : "View details for"} ${deal.name}`}
+                    className="cursor-pointer hover:bg-accent/50 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-inset transition-colors"
+                  >
                     <TableCell className="font-medium">
-                      <Link 
-                        href={`/deals/${deal.id}`}
-                        className="hover:underline focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 rounded"
-                      >
-                        {deal.name}
-                      </Link>
-                      {deal.address && (
-                        <p className="text-sm text-muted-foreground truncate max-w-[200px]">
-                          {deal.address}
-                        </p>
-                      )}
+                      <div>
+                        <span className="text-foreground">{deal.name}</span>
+                        {deal.address && (
+                          <p className="text-sm text-muted-foreground truncate max-w-[200px]">
+                            {deal.address}
+                          </p>
+                        )}
+                      </div>
                     </TableCell>
                     <TableCell>
                       {PROPERTY_TYPE_LABELS[deal.propertyType] || deal.propertyType}
@@ -138,38 +154,21 @@ export function DealsPageClient({ deals }: DealsPageClientProps) {
                         {statusConfig.label}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="text-right font-medium">
                       {fmt(deal.purchasePrice)}
                     </TableCell>
                     <TableCell className="text-right">
-                      <span className={(deal.estimatedROI ?? 0) >= 0 ? "text-green-600" : "text-red-600"}>
+                      <span className={`font-semibold ${(deal.estimatedROI ?? 0) >= 0 ? "text-green-600" : "text-red-600"}`}>
                         {formatPercent(deal.estimatedROI)}
                       </span>
                     </TableCell>
                     <TableCell className="text-right">
-                      <span className={(deal.estimatedProfit ?? 0) >= 0 ? "text-green-600" : "text-red-600"}>
+                      <span className={`font-semibold ${(deal.estimatedProfit ?? 0) >= 0 ? "text-green-600" : "text-red-600"}`}>
                         {fmt(deal.estimatedProfit)}
                       </span>
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center justify-end gap-2">
-                        <Button variant="ghost" size="icon" asChild>
-                          <Link 
-                            href={`/deals/${deal.id}`}
-                            aria-label={`${t("common.edit")} ${deal.name}`}
-                          >
-                            <Eye className="h-4 w-4" aria-hidden="true" />
-                          </Link>
-                        </Button>
-                        <Button variant="ghost" size="icon" asChild>
-                          <Link 
-                            href={`/deals/${deal.id}/edit`}
-                            aria-label={`${t("common.edit")} ${deal.name}`}
-                          >
-                            <Pencil className="h-4 w-4" aria-hidden="true" />
-                          </Link>
-                        </Button>
-                      </div>
+                      <ChevronRight className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
                     </TableCell>
                   </TableRow>
                 );
@@ -181,4 +180,3 @@ export function DealsPageClient({ deals }: DealsPageClientProps) {
     </div>
   );
 }
-

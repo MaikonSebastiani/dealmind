@@ -20,16 +20,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Calculator, TrendingUp, AlertTriangle } from "lucide-react";
+import { useLocale } from "@/contexts/locale-context";
 import { formatCurrency } from "@/lib/i18n/currency";
-
-const PROPERTY_TYPES = [
-  { value: "RESIDENTIAL", label: "Residential" },
-  { value: "COMMERCIAL", label: "Commercial" },
-  { value: "LAND", label: "Land" },
-  { value: "INDUSTRIAL", label: "Industrial" },
-  { value: "MIXED", label: "Mixed Use" },
-];
+import { 
+  calculateDealMetrics, 
+  getDefaultInterestRate, 
+  getLoanTermOptions 
+} from "@/lib/calculations/financing";
 
 interface EditDealPageProps {
   params: Promise<{ id: string }>;
@@ -37,9 +35,14 @@ interface EditDealPageProps {
 
 export default function EditDealPage({ params }: EditDealPageProps) {
   const router = useRouter();
+  const { t, locale } = useLocale();
   const [dealId, setDealId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [generalError, setGeneralError] = useState<string | null>(null);
+
+  // Get locale-specific defaults
+  const defaultInterestRate = getDefaultInterestRate(locale);
+  const loanTermOptions = getLoanTermOptions(locale);
 
   const {
     register,
@@ -61,7 +64,7 @@ export default function EditDealPage({ params }: EditDealPageProps) {
         const response = await fetch(`/api/deals/${id}`);
         
         if (!response.ok) {
-          setGeneralError("Deal not found");
+          setGeneralError(t("deal.notFound"));
           setIsLoading(false);
           return;
         }
@@ -78,29 +81,57 @@ export default function EditDealPage({ params }: EditDealPageProps) {
           monthlyExpenses: Number(deal.monthlyExpenses),
           estimatedSalePrice: Number(deal.estimatedSalePrice),
           estimatedTimeMonths: deal.estimatedTimeMonths,
+          useFinancing: deal.useFinancing || false,
+          downPayment: Number(deal.downPayment) || 0,
+          interestRate: Number(deal.interestRate) || defaultInterestRate,
+          loanTermYears: deal.loanTermYears || 30,
+          closingCosts: Number(deal.closingCosts) || 0,
           notes: deal.notes || "",
         });
       } catch {
-        setGeneralError("Failed to load deal");
+        setGeneralError(t("common.error"));
       } finally {
         setIsLoading(false);
       }
     }
 
     loadDeal();
-  }, [params, reset]);
+  }, [params, reset, t, defaultInterestRate]);
 
+  // Watch all values for calculations
   const purchasePrice = watch("purchasePrice") || 0;
   const estimatedCosts = watch("estimatedCosts") || 0;
   const monthlyExpenses = watch("monthlyExpenses") || 0;
   const estimatedSalePrice = watch("estimatedSalePrice") || 0;
   const estimatedTimeMonths = watch("estimatedTimeMonths") || 12;
+  const useFinancing = watch("useFinancing") || false;
+  const downPayment = watch("downPayment") || 0;
+  const interestRate = watch("interestRate") || defaultInterestRate;
+  const loanTermYears = watch("loanTermYears") || 30;
+  const closingCosts = watch("closingCosts") || 0;
 
-  // Calculate total monthly expenses over investment period
-  const totalMonthlyExpenses = monthlyExpenses * estimatedTimeMonths;
-  const totalInvestment = purchasePrice + estimatedCosts + totalMonthlyExpenses;
-  const estimatedProfit = estimatedSalePrice - totalInvestment;
-  const estimatedROI = totalInvestment > 0 ? (estimatedProfit / totalInvestment) * 100 : 0;
+  // Use centralized calculation
+  const metrics = calculateDealMetrics({
+    purchasePrice,
+    estimatedCosts,
+    monthlyExpenses,
+    estimatedSalePrice,
+    estimatedTimeMonths,
+    useFinancing,
+    downPayment,
+    interestRate,
+    loanTermYears,
+    closingCosts,
+  });
+
+  // Property types with translations
+  const PROPERTY_TYPES = [
+    { value: "RESIDENTIAL", label: t("deal.propertyType.residential") },
+    { value: "COMMERCIAL", label: t("deal.propertyType.commercial") },
+    { value: "LAND", label: t("deal.propertyType.land") },
+    { value: "INDUSTRIAL", label: t("deal.propertyType.industrial") },
+    { value: "MIXED", label: t("deal.propertyType.mixed") },
+  ];
 
   const onSubmit = async (data: CreateDealInput) => {
     if (!dealId) return;
@@ -117,21 +148,28 @@ export default function EditDealPage({ params }: EditDealPageProps) {
       const result = await response.json();
 
       if (!response.ok) {
-        setGeneralError(result.message || "Failed to update deal");
+        setGeneralError(result.message || t("common.error"));
         return;
       }
 
       router.push(`/deals/${dealId}`);
       router.refresh();
     } catch {
-      setGeneralError("Something went wrong. Please try again.");
+      setGeneralError(t("common.error"));
     }
   };
+
+  // Format currency based on locale
+  const fmt = (value: number) => formatCurrency(value, locale);
+
+  // Check if down payment is valid
+  const isDownPaymentValid = !useFinancing || (downPayment > 0 && downPayment <= purchasePrice);
+  const minDownPayment = purchasePrice * 0.05;
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <p className="text-muted-foreground">Loading deal...</p>
+        <p className="text-muted-foreground">{t("common.loading")}</p>
       </div>
     );
   }
@@ -141,11 +179,11 @@ export default function EditDealPage({ params }: EditDealPageProps) {
       <div className="space-y-6">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" asChild>
-            <Link href="/deals" aria-label="Back to deals">
+            <Link href="/deals" aria-label={t("common.back")}>
               <ArrowLeft className="h-4 w-4" aria-hidden="true" />
             </Link>
           </Button>
-          <h1 className="text-2xl font-bold tracking-tight">Edit Deal</h1>
+          <h1 className="text-2xl font-bold tracking-tight">{t("deal.title.edit")}</h1>
         </div>
         <div 
           role="alert"
@@ -161,15 +199,13 @@ export default function EditDealPage({ params }: EditDealPageProps) {
     <div className="space-y-6">
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="icon" asChild>
-          <Link href={`/deals/${dealId}`} aria-label="Back to deal">
+          <Link href={`/deals/${dealId}`} aria-label={t("common.back")}>
             <ArrowLeft className="h-4 w-4" aria-hidden="true" />
           </Link>
         </Button>
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Edit Deal</h1>
-          <p className="text-muted-foreground">
-            Update your deal information
-          </p>
+          <h1 className="text-2xl font-bold tracking-tight">{t("deal.title.edit")}</h1>
+          <p className="text-muted-foreground">{t("deal.subtitle.edit")}</p>
         </div>
       </div>
 
@@ -189,15 +225,16 @@ export default function EditDealPage({ params }: EditDealPageProps) {
           className="space-y-6 lg:col-span-2"
           noValidate
         >
+          {/* Basic Information */}
           <Card>
             <CardHeader>
-              <CardTitle>Basic Information</CardTitle>
+              <CardTitle>{t("deal.section.basicInfo")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <Input
                 id="name"
-                label="Deal Name"
-                placeholder="e.g., Downtown Apartment Complex"
+                label={t("deal.name")}
+                placeholder={t("deal.name.placeholder")}
                 error={errors.name?.message}
                 {...register("name")}
               />
@@ -206,14 +243,15 @@ export default function EditDealPage({ params }: EditDealPageProps) {
                 <div className="sm:col-span-2">
                   <Input
                     id="address"
-                    label="Address"
-                    placeholder="e.g., 123 Main St, City, State"
+                    label={t("deal.address")}
+                    placeholder={t("deal.address.placeholder")}
                     error={errors.address?.message}
                     {...register("address")}
                   />
                 </div>
                 <ZipCodeInput
                   id="zipCode"
+                  locale={locale}
                   value={watch("zipCode") || ""}
                   onChange={(value) => setValue("zipCode", value)}
                   error={errors.zipCode?.message}
@@ -221,13 +259,13 @@ export default function EditDealPage({ params }: EditDealPageProps) {
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="propertyType">Property Type</Label>
+                <Label htmlFor="propertyType">{t("deal.propertyType")}</Label>
                 <Select
                   value={watch("propertyType")}
                   onValueChange={(value) => setValue("propertyType", value as CreateDealInput["propertyType"])}
                 >
                   <SelectTrigger id="propertyType">
-                    <SelectValue placeholder="Select property type" />
+                    <SelectValue placeholder={t("deal.propertyType.select")} />
                   </SelectTrigger>
                   <SelectContent>
                     {PROPERTY_TYPES.map((type) => (
@@ -244,16 +282,17 @@ export default function EditDealPage({ params }: EditDealPageProps) {
             </CardContent>
           </Card>
 
+          {/* Financial Details */}
           <Card>
             <CardHeader>
-              <CardTitle>Financial Details</CardTitle>
+              <CardTitle>{t("deal.section.financial")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-4 sm:grid-cols-2">
                 <CurrencyInput
                   id="purchasePrice"
-                  label="Purchase Price"
-                  placeholder="$ 250,000.00"
+                  label={t("deal.purchasePrice")}
+                  locale={locale}
                   value={watch("purchasePrice")}
                   onValueChange={(value) => setValue("purchasePrice", value, { shouldValidate: true })}
                   error={errors.purchasePrice?.message}
@@ -261,40 +300,40 @@ export default function EditDealPage({ params }: EditDealPageProps) {
 
                 <CurrencyInput
                   id="estimatedCosts"
-                  label="Renovation/Repair Costs"
-                  placeholder="$ 50,000.00"
+                  label={t("deal.renovationCosts")}
+                  locale={locale}
                   value={watch("estimatedCosts")}
                   onValueChange={(value) => setValue("estimatedCosts", value, { shouldValidate: true })}
                   error={errors.estimatedCosts?.message}
-                  description="One-time costs (renovation, repairs, closing)"
+                  description={t("deal.renovationCosts.description")}
                 />
 
                 <CurrencyInput
                   id="monthlyExpenses"
-                  label="Monthly Expenses"
-                  placeholder="$ 500.00"
+                  label={t("deal.monthlyExpenses")}
+                  locale={locale}
                   value={watch("monthlyExpenses")}
                   onValueChange={(value) => setValue("monthlyExpenses", value, { shouldValidate: true })}
                   error={errors.monthlyExpenses?.message}
-                  description="HOA, taxes, insurance, maintenance"
+                  description={t("deal.monthlyExpenses.description")}
                 />
 
                 <CurrencyInput
                   id="estimatedSalePrice"
-                  label="Estimated Sale Price"
-                  placeholder="$ 350,000.00"
+                  label={t("deal.estimatedSalePrice")}
+                  locale={locale}
                   value={watch("estimatedSalePrice")}
                   onValueChange={(value) => setValue("estimatedSalePrice", value, { shouldValidate: true })}
                   error={errors.estimatedSalePrice?.message}
                 />
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="estimatedTimeMonths">Timeline (months)</Label>
+                  <Label htmlFor="estimatedTimeMonths">{t("deal.timeline")}</Label>
                   <input
                     id="estimatedTimeMonths"
                     type="number"
                     min="1"
-                    max="120"
+                    max="60"
                     className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary disabled:cursor-not-allowed disabled:opacity-50"
                     placeholder="12"
                     {...register("estimatedTimeMonths", { valueAsNumber: true })}
@@ -302,91 +341,266 @@ export default function EditDealPage({ params }: EditDealPageProps) {
                   {errors.estimatedTimeMonths && (
                     <p className="text-sm text-destructive">{errors.estimatedTimeMonths.message}</p>
                   )}
-                  <p className="text-xs text-muted-foreground">Used to calculate total monthly expenses</p>
+                  <p className="text-xs text-muted-foreground">{t("deal.timeline.description")}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
+          {/* Financing Section */}
           <Card>
             <CardHeader>
-              <CardTitle>Notes</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <Calculator className="h-5 w-5" aria-hidden="true" />
+                {t("deal.section.financing")}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  id="useFinancing"
+                  className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                  {...register("useFinancing")}
+                />
+                <Label htmlFor="useFinancing" className="cursor-pointer">
+                  {t("deal.financing.enabled")}
+                </Label>
+              </div>
+
+              {useFinancing && (
+                <div className="grid gap-4 sm:grid-cols-2 pt-4 border-t">
+                  <div className="space-y-1.5">
+                    <CurrencyInput
+                      id="downPayment"
+                      label={t("deal.financing.downPayment")}
+                      locale={locale}
+                      value={watch("downPayment")}
+                      onValueChange={(value) => setValue("downPayment", value, { shouldValidate: true })}
+                      error={errors.downPayment?.message}
+                    />
+                    {purchasePrice > 0 && downPayment < minDownPayment && (
+                      <p className="text-xs text-amber-600 flex items-center gap-1">
+                        <AlertTriangle className="h-3 w-3" />
+                        {locale === "pt-BR" 
+                          ? `Mínimo recomendado: ${fmt(minDownPayment)} (5%)`
+                          : `Minimum recommended: ${fmt(minDownPayment)} (5%)`
+                        }
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label>{t("deal.financing.loanAmount")}</Label>
+                    <div className="flex h-10 w-full items-center rounded-lg border border-input bg-muted/50 px-3 py-2 text-sm">
+                      {fmt(metrics.loanAmount)}
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="interestRate">{t("deal.financing.interestRate")}</Label>
+                    <div className="relative">
+                      <input
+                        id="interestRate"
+                        type="number"
+                        step="0.1"
+                        min="0"
+                        max="50"
+                        className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 pr-8 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                        {...register("interestRate", { valueAsNumber: true })}
+                      />
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">%</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">{t("deal.financing.interestRate.description")}</p>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="loanTermYears">{t("deal.financing.loanTerm")}</Label>
+                    <Select
+                      value={String(watch("loanTermYears") || 30)}
+                      onValueChange={(value) => setValue("loanTermYears", Number(value))}
+                    >
+                      <SelectTrigger id="loanTermYears">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {loanTermOptions.map((years) => (
+                          <SelectItem key={years} value={String(years)}>
+                            {years} {locale === "pt-BR" ? "anos" : "years"}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <CurrencyInput
+                    id="closingCosts"
+                    label={t("deal.financing.closingCosts")}
+                    locale={locale}
+                    value={watch("closingCosts")}
+                    onValueChange={(value) => setValue("closingCosts", value)}
+                    description={t("deal.financing.closingCosts.description")}
+                  />
+
+                  <div className="space-y-1.5">
+                    <Label>{t("deal.financing.monthlyPayment")}</Label>
+                    <div className="flex h-10 w-full items-center rounded-lg border border-input bg-muted/50 px-3 py-2 text-sm font-medium">
+                      {fmt(metrics.monthlyPayment)}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Notes */}
+          <Card>
+            <CardHeader>
+              <CardTitle>{t("deal.section.notes")}</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-1.5">
-                <Label htmlFor="notes">Additional Notes</Label>
-                <Textarea
-                  id="notes"
-                  placeholder="Any additional information about this deal..."
-                  className="min-h-[100px]"
-                  {...register("notes")}
-                />
-                {errors.notes && (
-                  <p className="text-sm text-destructive">{errors.notes.message}</p>
-                )}
-              </div>
+              <Textarea
+                id="notes"
+                placeholder={t("deal.notes.placeholder")}
+                className="min-h-[100px]"
+                {...register("notes")}
+              />
             </CardContent>
           </Card>
 
           <div className="flex gap-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => router.push(`/deals/${dealId}`)}
-            >
-              Cancel
+            <Button type="button" variant="outline" onClick={() => router.push(`/deals/${dealId}`)}>
+              {t("common.cancel")}
             </Button>
-            <Button type="submit" disabled={isSubmitting} aria-busy={isSubmitting}>
-              {isSubmitting ? "Saving..." : "Save Changes"}
+            <Button 
+              type="submit" 
+              disabled={isSubmitting || (useFinancing && !isDownPaymentValid)} 
+              aria-busy={isSubmitting}
+            >
+              {isSubmitting ? t("common.saving") : t("common.save")}
             </Button>
           </div>
         </form>
 
+        {/* Preview Panel */}
         <div className="lg:col-span-1">
           <Card className="sticky top-6">
             <CardHeader>
-              <CardTitle>Investment Preview</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <TrendingUp className="h-5 w-5" aria-hidden="true" />
+                {t("deal.section.preview")}
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              {/* Investment Breakdown */}
               <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Purchase Price</span>
-                  <span>{formatCurrency(purchasePrice)}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">+ Renovation Costs</span>
-                  <span>{formatCurrency(estimatedCosts)}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">+ Monthly ({formatCurrency(monthlyExpenses)} × {estimatedTimeMonths}mo)</span>
-                  <span>{formatCurrency(totalMonthlyExpenses)}</span>
-                </div>
+                <h4 className="text-sm font-medium text-muted-foreground">
+                  {locale === "pt-BR" ? "Capital Necessário" : "Cash Needed"}
+                </h4>
+                
+                {useFinancing ? (
+                  <>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">{t("deal.financing.downPayment")}</span>
+                      <span>{fmt(downPayment)}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">{t("deal.renovationCosts")}</span>
+                      <span>{fmt(estimatedCosts)}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">{t("deal.financing.closingCosts")}</span>
+                      <span>{fmt(closingCosts)}</span>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">{t("preview.purchasePrice")}</span>
+                      <span>{fmt(purchasePrice)}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">{t("preview.renovationCosts")}</span>
+                      <span>{fmt(estimatedCosts)}</span>
+                    </div>
+                  </>
+                )}
+                
                 <div className="border-t pt-2 flex justify-between font-medium">
-                  <span>Total Investment</span>
-                  <span>{formatCurrency(totalInvestment)}</span>
+                  <span>{locale === "pt-BR" ? "Total Investido" : "Total Cash Invested"}</span>
+                  <span>{fmt(metrics.totalCashInvested)}</span>
                 </div>
               </div>
 
-              <div className="border-t pt-4 space-y-2">
+              {/* Holding Costs */}
+              <div className="space-y-2 border-t pt-4">
+                <h4 className="text-sm font-medium text-muted-foreground">
+                  {locale === "pt-BR" ? `Custos (${estimatedTimeMonths} meses)` : `Holding Costs (${estimatedTimeMonths}mo)`}
+                </h4>
+                
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Sale Price</span>
-                  <span>{formatCurrency(estimatedSalePrice)}</span>
+                  <span className="text-muted-foreground">
+                    {t("deal.monthlyExpenses")} × {estimatedTimeMonths}
+                  </span>
+                  <span>{fmt(monthlyExpenses * estimatedTimeMonths)}</span>
                 </div>
-                <div className="flex justify-between font-medium">
-                  <span>Estimated Profit</span>
-                  <span className={estimatedProfit >= 0 ? "text-green-600" : "text-red-600"}>
-                    {formatCurrency(estimatedProfit)}
+                
+                {useFinancing && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">
+                      {t("deal.financing.monthlyPayment")} × {estimatedTimeMonths}
+                    </span>
+                    <span>{fmt(metrics.monthlyPayment * estimatedTimeMonths)}</span>
+                  </div>
+                )}
+                
+                <div className="flex justify-between text-sm font-medium">
+                  <span>{locale === "pt-BR" ? "Total Custos" : "Total Costs"}</span>
+                  <span>{fmt(metrics.totalHoldingCosts)}</span>
+                </div>
+              </div>
+
+              {/* Sale & Profit */}
+              <div className="space-y-2 border-t pt-4">
+                <h4 className="text-sm font-medium text-muted-foreground">
+                  {locale === "pt-BR" ? "Na Venda" : "At Sale"}
+                </h4>
+                
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">{t("preview.salePrice")}</span>
+                  <span>{fmt(metrics.grossProceeds)}</span>
+                </div>
+                
+                {useFinancing && metrics.loanAmount > 0 && (
+                  <div className="flex justify-between text-sm text-amber-600">
+                    <span>{t("preview.loanPayoff")}</span>
+                    <span>- {fmt(metrics.loanAmount)}</span>
+                  </div>
+                )}
+                
+                <div className="flex justify-between font-medium pt-2 border-t">
+                  <span>{t("preview.estimatedProfit")}</span>
+                  <span className={metrics.estimatedProfit >= 0 ? "text-green-600" : "text-red-600"}>
+                    {fmt(metrics.estimatedProfit)}
                   </span>
                 </div>
               </div>
 
-              <div className="border-t pt-4">
+              {/* ROI */}
+              <div className="border-t pt-4 bg-muted/30 -mx-6 -mb-6 px-6 py-4 rounded-b-lg">
                 <div className="flex justify-between items-center">
-                  <span className="font-medium">Estimated ROI</span>
-                  <span 
-                    className={`text-2xl font-bold ${estimatedROI >= 0 ? "text-green-600" : "text-red-600"}`}
-                  >
-                    {estimatedROI.toFixed(1)}%
+                  <div>
+                    <span className="font-medium">{t("preview.roi")}</span>
+                    {useFinancing && (
+                      <p className="text-xs text-muted-foreground">
+                        {locale === "pt-BR" 
+                          ? "Retorno sobre capital próprio" 
+                          : "Return on your cash"}
+                      </p>
+                    )}
+                  </div>
+                  <span className={`text-3xl font-bold ${metrics.estimatedROI >= 0 ? "text-green-600" : "text-red-600"}`}>
+                    {metrics.estimatedROI.toFixed(1)}%
                   </span>
                 </div>
               </div>
@@ -397,4 +611,3 @@ export default function EditDealPage({ params }: EditDealPageProps) {
     </div>
   );
 }
-
