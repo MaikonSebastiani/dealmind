@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Pencil, MapPin, Calendar, Building, Calculator } from "lucide-react";
+import { ArrowLeft, Pencil, MapPin, Calendar, Building, Calculator, Home, Bed, Bath, Car, Ruler } from "lucide-react";
 import { DeleteDealButton } from "./delete-button";
 import { useLocale } from "@/contexts/locale-context";
 import { formatCurrency } from "@/lib/i18n/currency";
@@ -17,6 +17,15 @@ interface Deal {
   zipCode: string | null;
   propertyType: string;
   status: string;
+  // Property characteristics
+  area: number | null;
+  bedrooms: number | null;
+  bathrooms: number | null;
+  parkingSpaces: number | null;
+  lotSize: number | null;
+  yearBuilt: number | null;
+  condition: string | null;
+  // Financial
   purchasePrice: number;
   estimatedCosts: number;
   monthlyExpenses: number;
@@ -45,6 +54,7 @@ export function DealDetailClient({ deal }: DealDetailClientProps) {
 
   const STATUS_CONFIG: Record<string, { label: string; variant: "default" | "secondary" | "destructive" }> = {
     ANALYZING: { label: t("status.analyzing"), variant: "secondary" },
+    ANALYSIS_COMPLETE: { label: t("status.analysisComplete"), variant: "default" },
     APPROVED: { label: t("status.approved"), variant: "default" },
     REJECTED: { label: t("status.rejected"), variant: "destructive" },
     PURCHASED: { label: t("status.purchased"), variant: "default" },
@@ -60,6 +70,17 @@ export function DealDetailClient({ deal }: DealDetailClientProps) {
     INDUSTRIAL: t("deal.propertyType.industrial"),
     MIXED: t("deal.propertyType.mixed"),
   };
+
+  const CONDITION_LABELS: Record<string, string> = {
+    NEW: t("deal.condition.new"),
+    EXCELLENT: t("deal.condition.excellent"),
+    GOOD: t("deal.condition.good"),
+    FAIR: t("deal.condition.fair"),
+    NEEDS_WORK: t("deal.condition.needsWork"),
+  };
+
+  // Area unit based on locale
+  const areaUnit = locale === "pt-BR" ? t("deal.area.unit") : t("deal.area.unitUS");
 
   const fmt = (value: number | null) => {
     if (value === null) return "-";
@@ -178,6 +199,91 @@ export function DealDetailClient({ deal }: DealDetailClientProps) {
           </CardContent>
         </Card>
       </div>
+
+      {/* Property Characteristics - only show if any data exists */}
+      {(deal.area || deal.bedrooms || deal.bathrooms || deal.parkingSpaces || deal.lotSize || deal.yearBuilt || deal.condition) && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Home className="h-5 w-5" aria-hidden="true" />
+              {t("deal.section.characteristics")}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {deal.area && (
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
+                  <Ruler className="h-5 w-5 text-primary" aria-hidden="true" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">{t("deal.area")}</p>
+                    <p className="font-medium">{deal.area} {areaUnit}</p>
+                  </div>
+                </div>
+              )}
+              
+              {deal.bedrooms !== null && (
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
+                  <Bed className="h-5 w-5 text-primary" aria-hidden="true" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">{t("deal.bedrooms")}</p>
+                    <p className="font-medium">{deal.bedrooms}</p>
+                  </div>
+                </div>
+              )}
+              
+              {deal.bathrooms !== null && (
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
+                  <Bath className="h-5 w-5 text-primary" aria-hidden="true" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">{t("deal.bathrooms")}</p>
+                    <p className="font-medium">{deal.bathrooms}</p>
+                  </div>
+                </div>
+              )}
+              
+              {deal.parkingSpaces !== null && (
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
+                  <Car className="h-5 w-5 text-primary" aria-hidden="true" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">{t("deal.parkingSpaces")}</p>
+                    <p className="font-medium">{deal.parkingSpaces}</p>
+                  </div>
+                </div>
+              )}
+              
+              {deal.lotSize && (
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
+                  <Ruler className="h-5 w-5 text-primary" aria-hidden="true" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">{t("deal.lotSize")}</p>
+                    <p className="font-medium">{deal.lotSize} {areaUnit}</p>
+                  </div>
+                </div>
+              )}
+              
+              {deal.yearBuilt && (
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
+                  <Calendar className="h-5 w-5 text-primary" aria-hidden="true" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">{t("deal.yearBuilt")}</p>
+                    <p className="font-medium">{deal.yearBuilt}</p>
+                  </div>
+                </div>
+              )}
+              
+              {deal.condition && (
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
+                  <Building className="h-5 w-5 text-primary" aria-hidden="true" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">{t("deal.condition")}</p>
+                    <p className="font-medium">{CONDITION_LABELS[deal.condition] || deal.condition}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Financial Breakdown */}

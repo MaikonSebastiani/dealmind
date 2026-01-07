@@ -64,6 +64,10 @@ export default async function DealsPage({ searchParams }: PageProps) {
   // Serialize Decimal fields
   const serializedDeals = deals.map(deal => ({
     ...deal,
+    // Property characteristics (Decimal fields)
+    area: deal.area ? Number(deal.area) : null,
+    lotSize: deal.lotSize ? Number(deal.lotSize) : null,
+    // Financial fields
     purchasePrice: Number(deal.purchasePrice),
     estimatedCosts: Number(deal.estimatedCosts),
     monthlyExpenses: Number(deal.monthlyExpenses),

@@ -46,6 +46,7 @@ function DealsContent({ deals }: DealsPageClientProps) {
 
   const STATUS_CONFIG: Record<string, { label: string; variant: "default" | "secondary" | "destructive" }> = {
     ANALYZING: { label: t("status.analyzing"), variant: "secondary" },
+    ANALYSIS_COMPLETE: { label: t("status.analysisComplete"), variant: "default" },
     APPROVED: { label: t("status.approved"), variant: "default" },
     REJECTED: { label: t("status.rejected"), variant: "destructive" },
     PURCHASED: { label: t("status.purchased"), variant: "default" },

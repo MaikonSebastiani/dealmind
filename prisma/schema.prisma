@@ -83,13 +83,22 @@ enum PropertyType {
 }
 
 enum DealStatus {
-  ANALYZING     // Em análise
-  APPROVED      // Aprovado para compra
-  REJECTED      // Rejeitado
-  PURCHASED     // Comprado
-  RENOVATING    // Em reforma
-  FOR_SALE      // À venda
-  SOLD          // Vendido
+  ANALYZING           // Em análise (aguardando IA)
+  ANALYSIS_COMPLETE   // Análise da IA concluída
+  APPROVED            // Aprovado para compra
+  REJECTED            // Rejeitado
+  PURCHASED           // Comprado
+  RENOVATING          // Em reforma
+  FOR_SALE            // À venda
+  SOLD                // Vendido
+}
+
+enum PropertyCondition {
+  NEW           // Novo/Na planta
+  EXCELLENT     // Excelente estado
+  GOOD          // Bom estado
+  FAIR          // Estado regular
+  NEEDS_WORK    // Precisa de reforma
 }
 
 // ==========================================
@@ -106,6 +115,15 @@ model Deal {
   zipCode            String?
   propertyType       PropertyType @default(RESIDENTIAL)
   status             DealStatus   @default(ANALYZING)
+  
+  // Property Characteristics (for AI analysis)
+  area               Decimal?     @db.Decimal(10, 2)  // m² or sqft
+  bedrooms           Int?
+  bathrooms          Int?
+  parkingSpaces      Int?
+  lotSize            Decimal?     @db.Decimal(10, 2)  // Terreno m² (optional for apartments)
+  yearBuilt          Int?
+  condition          PropertyCondition?
   
   // Financial Inputs
   purchasePrice      Decimal      @db.Decimal(12, 2)

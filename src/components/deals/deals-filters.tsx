@@ -17,6 +17,7 @@ import { useLocale } from "@/contexts/locale-context";
 const STATUS_OPTIONS = [
   { value: "all", labelKey: "filter.status.all" },
   { value: "ANALYZING", labelKey: "status.analyzing" },
+  { value: "ANALYSIS_COMPLETE", labelKey: "status.analysisComplete" },
   { value: "APPROVED", labelKey: "status.approved" },
   { value: "REJECTED", labelKey: "status.rejected" },
   { value: "PURCHASED", labelKey: "status.purchased" },

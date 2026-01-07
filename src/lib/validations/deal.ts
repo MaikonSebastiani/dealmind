@@ -1,5 +1,30 @@
 import { z } from "zod";
 
+// Property condition enum
+const PropertyConditionEnum = z.enum([
+  "NEW",
+  "EXCELLENT",
+  "GOOD",
+  "FAIR",
+  "NEEDS_WORK",
+]);
+
+// Helper to handle NaN from empty number inputs
+const optionalPositiveNumber = z.preprocess(
+  (val) => (val === "" || val === null || val === undefined || Number.isNaN(val) ? null : val),
+  z.number().positive().optional().nullable()
+);
+
+const optionalNonNegativeInt = z.preprocess(
+  (val) => (val === "" || val === null || val === undefined || Number.isNaN(val) ? null : val),
+  z.number().int().min(0).optional().nullable()
+);
+
+const optionalYear = z.preprocess(
+  (val) => (val === "" || val === null || val === undefined || Number.isNaN(val) ? null : val),
+  z.number().int().min(1800).max(new Date().getFullYear() + 5).optional().nullable()
+);
+
 // Base schema without refinements
 const baseDealSchema = z.object({
   name: z
@@ -24,6 +49,18 @@ const baseDealSchema = z.object({
     "INDUSTRIAL",
     "MIXED",
   ]),
+  
+  // Property Characteristics (for AI analysis)
+  // Using preprocess helpers to handle NaN from empty inputs
+  area: optionalPositiveNumber,
+  bedrooms: optionalNonNegativeInt,
+  bathrooms: optionalNonNegativeInt,
+  parkingSpaces: optionalNonNegativeInt,
+  lotSize: optionalPositiveNumber,
+  yearBuilt: optionalYear,
+  condition: PropertyConditionEnum.optional().nullable(),
+  
+  // Financial Inputs
   purchasePrice: z
     .number()
     .positive("Purchase price must be positive")
@@ -109,6 +146,7 @@ export type UpdateDealInput = z.infer<typeof updateDealSchema>;
 export const updateDealStatusSchema = z.object({
   status: z.enum([
     "ANALYZING",
+    "ANALYSIS_COMPLETE",
     "APPROVED",
     "REJECTED",
     "PURCHASED",

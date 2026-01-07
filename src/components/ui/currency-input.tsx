@@ -33,9 +33,21 @@ const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputProps>(
     },
     ref
   ) => {
+    const inputRef = React.useRef<HTMLInputElement>(null);
     const config = getCurrencyConfig(locale);
     const errorId = error ? `${id}-error` : undefined;
     const descriptionId = description ? `${id}-description` : undefined;
+
+    // Treat 0 as empty for better UX - user can type directly
+    const displayValue = value === 0 ? "" : value;
+
+    // Select all content on focus for easy replacement
+    const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+      // Small timeout to ensure the value is rendered before selecting
+      setTimeout(() => {
+        e.target.select();
+      }, 0);
+    };
 
     return (
       <div className="space-y-1.5">
@@ -51,19 +63,26 @@ const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputProps>(
         <div className="relative">
           <NumericFormat
             id={id}
-            getInputRef={ref}
-            value={value}
+            getInputRef={(el) => {
+              // Handle both refs
+              if (typeof ref === "function") ref(el);
+              else if (ref) ref.current = el;
+              inputRef.current = el;
+            }}
+            value={displayValue}
             onValueChange={(values) => {
               onValueChange?.(values.floatValue ?? 0);
             }}
+            onFocus={handleFocus}
             thousandSeparator={config.thousandSeparator}
             decimalSeparator={config.decimalSeparator}
             prefix={config.prefix}
             suffix={config.suffix}
             decimalScale={config.decimalScale}
-            fixedDecimalScale
+            fixedDecimalScale={false}
             allowNegative={false}
             disabled={disabled}
+            placeholder={`${config.prefix}0${config.decimalSeparator}00`}
             aria-invalid={error ? "true" : "false"}
             aria-describedby={
               [errorId, descriptionId].filter(Boolean).join(" ") || undefined

@@ -18,7 +18,7 @@ export async function POST(request: Request) {
     const result = registerApiSchema.safeParse(body);
     
     if (!result.success) {
-      const firstError = result.error.errors[0];
+      const firstError = result.error.issues[0];
       return NextResponse.json(
         { error: "VALIDATION_ERROR", message: firstError.message },
         { status: 400 }

@@ -54,6 +54,15 @@ export async function POST(request: Request) {
         address: data.address,
         zipCode: data.zipCode,
         propertyType: data.propertyType,
+        // Property characteristics
+        area: data.area,
+        bedrooms: data.bedrooms,
+        bathrooms: data.bathrooms,
+        parkingSpaces: data.parkingSpaces,
+        lotSize: data.lotSize,
+        yearBuilt: data.yearBuilt,
+        condition: data.condition,
+        // Financial
         purchasePrice: data.purchasePrice,
         estimatedCosts: data.estimatedCosts || 0,
         monthlyExpenses: data.monthlyExpenses || 0,
@@ -118,12 +127,8 @@ export async function GET(request: Request) {
     const orderByField = validSortFields.includes(sortField) ? sortField : "createdAt";
 
     // Build where clause
-    const where: {
-      userId: string;
-      status?: string;
-      propertyType?: string;
-      OR?: Array<{ name?: { contains: string; mode: "insensitive" }; address?: { contains: string; mode: "insensitive" } }>;
-    } = {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const where: any = {
       userId: session.user.id,
     };
 

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { createDealSchema, type CreateDealInput } from "@/lib/validations/deal";
+import { createDealSchema } from "@/lib/validations/deal";
 import { Input } from "@/components/ui/input";
 import { CurrencyInput } from "@/components/ui/currency-input";
 import { ZipCodeInput } from "@/components/ui/zipcode-input";
@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Calculator, TrendingUp, AlertTriangle } from "lucide-react";
+import { ArrowLeft, Calculator, TrendingUp, AlertTriangle, Home } from "lucide-react";
 import { useLocale } from "@/contexts/locale-context";
 import { formatCurrency } from "@/lib/i18n/currency";
 import { 
@@ -51,8 +51,32 @@ export default function EditDealPage({ params }: EditDealPageProps) {
     setValue,
     reset,
     formState: { errors, isSubmitting },
-  } = useForm<CreateDealInput>({
+  } = useForm({
     resolver: zodResolver(createDealSchema),
+    defaultValues: {
+      name: "",
+      address: "",
+      zipCode: "",
+      propertyType: "RESIDENTIAL" as const,
+      area: null as number | null,
+      bedrooms: null as number | null,
+      bathrooms: null as number | null,
+      parkingSpaces: null as number | null,
+      lotSize: null as number | null,
+      yearBuilt: null as number | null,
+      condition: null as "NEW" | "EXCELLENT" | "GOOD" | "FAIR" | "NEEDS_WORK" | null,
+      purchasePrice: 0,
+      estimatedCosts: 0,
+      monthlyExpenses: 0,
+      estimatedSalePrice: 0,
+      estimatedTimeMonths: 12,
+      useFinancing: false,
+      downPayment: 0,
+      interestRate: defaultInterestRate,
+      loanTermYears: 30,
+      closingCosts: 0,
+      notes: "",
+    },
   });
 
   useEffect(() => {
@@ -76,6 +100,15 @@ export default function EditDealPage({ params }: EditDealPageProps) {
           address: deal.address || "",
           zipCode: deal.zipCode || "",
           propertyType: deal.propertyType,
+          // Property characteristics
+          area: deal.area ? Number(deal.area) : null,
+          bedrooms: deal.bedrooms,
+          bathrooms: deal.bathrooms,
+          parkingSpaces: deal.parkingSpaces,
+          lotSize: deal.lotSize ? Number(deal.lotSize) : null,
+          yearBuilt: deal.yearBuilt,
+          condition: deal.condition,
+          // Financial
           purchasePrice: Number(deal.purchasePrice),
           estimatedCosts: Number(deal.estimatedCosts),
           monthlyExpenses: Number(deal.monthlyExpenses),
@@ -133,7 +166,19 @@ export default function EditDealPage({ params }: EditDealPageProps) {
     { value: "MIXED", label: t("deal.propertyType.mixed") },
   ];
 
-  const onSubmit = async (data: CreateDealInput) => {
+  // Property conditions with translations
+  const PROPERTY_CONDITIONS = [
+    { value: "NEW", label: t("deal.condition.new") },
+    { value: "EXCELLENT", label: t("deal.condition.excellent") },
+    { value: "GOOD", label: t("deal.condition.good") },
+    { value: "FAIR", label: t("deal.condition.fair") },
+    { value: "NEEDS_WORK", label: t("deal.condition.needsWork") },
+  ];
+
+  // Area unit based on locale
+  const areaUnit = locale === "pt-BR" ? t("deal.area.unit") : t("deal.area.unitUS");
+
+  const onSubmit = async (data: Record<string, unknown>) => {
     if (!dealId) return;
     
     setGeneralError(null);
@@ -262,7 +307,7 @@ export default function EditDealPage({ params }: EditDealPageProps) {
                 <Label htmlFor="propertyType">{t("deal.propertyType")}</Label>
                 <Select
                   value={watch("propertyType")}
-                  onValueChange={(value) => setValue("propertyType", value as CreateDealInput["propertyType"])}
+                  onValueChange={(value) => setValue("propertyType", value as "RESIDENTIAL" | "COMMERCIAL" | "LAND" | "INDUSTRIAL" | "MIXED")}
                 >
                   <SelectTrigger id="propertyType">
                     <SelectValue placeholder={t("deal.propertyType.select")} />
@@ -278,6 +323,119 @@ export default function EditDealPage({ params }: EditDealPageProps) {
                 {errors.propertyType && (
                   <p className="text-sm text-destructive">{errors.propertyType.message}</p>
                 )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Property Characteristics */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Home className="h-5 w-5" aria-hidden="true" />
+                {t("deal.section.characteristics")}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="area">{t("deal.area")} ({areaUnit})</Label>
+                  <input
+                    id="area"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                    placeholder={t("deal.area.placeholder")}
+                    {...register("area", { valueAsNumber: true })}
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="bedrooms">{t("deal.bedrooms")}</Label>
+                  <input
+                    id="bedrooms"
+                    type="number"
+                    min="0"
+                    max="50"
+                    className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                    placeholder="3"
+                    {...register("bedrooms", { valueAsNumber: true })}
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="bathrooms">{t("deal.bathrooms")}</Label>
+                  <input
+                    id="bathrooms"
+                    type="number"
+                    min="0"
+                    max="50"
+                    className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                    placeholder="2"
+                    {...register("bathrooms", { valueAsNumber: true })}
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="parkingSpaces">{t("deal.parkingSpaces")}</Label>
+                  <input
+                    id="parkingSpaces"
+                    type="number"
+                    min="0"
+                    max="100"
+                    className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                    placeholder="2"
+                    {...register("parkingSpaces", { valueAsNumber: true })}
+                  />
+                </div>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-3">
+                <div className="space-y-1.5">
+                  <Label htmlFor="lotSize">{t("deal.lotSize")} ({areaUnit})</Label>
+                  <input
+                    id="lotSize"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                    placeholder="250"
+                    {...register("lotSize", { valueAsNumber: true })}
+                  />
+                  <p className="text-xs text-muted-foreground">{t("deal.lotSize.description")}</p>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="yearBuilt">{t("deal.yearBuilt")}</Label>
+                  <input
+                    id="yearBuilt"
+                    type="number"
+                    min="1800"
+                    max={new Date().getFullYear() + 5}
+                    className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                    placeholder="2010"
+                    {...register("yearBuilt", { valueAsNumber: true })}
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="condition">{t("deal.condition")}</Label>
+                  <Select
+                    value={watch("condition") || ""}
+                    onValueChange={(value) => setValue("condition", value as "NEW" | "EXCELLENT" | "GOOD" | "FAIR" | "NEEDS_WORK")}
+                  >
+                    <SelectTrigger id="condition">
+                      <SelectValue placeholder={t("deal.condition.select")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {PROPERTY_CONDITIONS.map((cond) => (
+                        <SelectItem key={cond.value} value={cond.value}>
+                          {cond.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </CardContent>
           </Card>

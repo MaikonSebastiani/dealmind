@@ -107,12 +107,33 @@ const translations: Record<LocaleCode, Record<string, string>> = {
     
     // Status
     "status.analyzing": "Analyzing",
+    "status.analysisComplete": "Analysis Complete",
     "status.approved": "Approved",
     "status.rejected": "Rejected",
     "status.purchased": "Purchased",
     "status.renovating": "Renovating",
     "status.forSale": "For Sale",
     "status.sold": "Sold",
+    
+    // Property Characteristics
+    "deal.section.characteristics": "Property Characteristics",
+    "deal.area": "Area",
+    "deal.area.placeholder": "e.g., 120",
+    "deal.area.unit": "m²",
+    "deal.area.unitUS": "sqft",
+    "deal.bedrooms": "Bedrooms",
+    "deal.bathrooms": "Bathrooms",
+    "deal.parkingSpaces": "Parking Spaces",
+    "deal.lotSize": "Lot Size",
+    "deal.lotSize.description": "Land area (optional for apartments)",
+    "deal.yearBuilt": "Year Built",
+    "deal.condition": "Condition",
+    "deal.condition.new": "New/Under Construction",
+    "deal.condition.excellent": "Excellent",
+    "deal.condition.good": "Good",
+    "deal.condition.fair": "Fair",
+    "deal.condition.needsWork": "Needs Work",
+    "deal.condition.select": "Select condition",
     
     // Deal List
     "deals.title": "Deals",
@@ -253,12 +274,33 @@ const translations: Record<LocaleCode, Record<string, string>> = {
     
     // Status
     "status.analyzing": "Analisando",
+    "status.analysisComplete": "Análise Completa",
     "status.approved": "Aprovado",
     "status.rejected": "Rejeitado",
     "status.purchased": "Comprado",
     "status.renovating": "Em Reforma",
     "status.forSale": "À Venda",
     "status.sold": "Vendido",
+    
+    // Property Characteristics
+    "deal.section.characteristics": "Características do Imóvel",
+    "deal.area": "Área",
+    "deal.area.placeholder": "ex: 120",
+    "deal.area.unit": "m²",
+    "deal.area.unitUS": "sqft",
+    "deal.bedrooms": "Quartos",
+    "deal.bathrooms": "Banheiros",
+    "deal.parkingSpaces": "Vagas",
+    "deal.lotSize": "Terreno",
+    "deal.lotSize.description": "Área do terreno (opcional para apartamentos)",
+    "deal.yearBuilt": "Ano de Construção",
+    "deal.condition": "Estado",
+    "deal.condition.new": "Novo/Na Planta",
+    "deal.condition.excellent": "Excelente",
+    "deal.condition.good": "Bom",
+    "deal.condition.fair": "Regular",
+    "deal.condition.needsWork": "Precisa de Reforma",
+    "deal.condition.select": "Selecione o estado",
     
     // Deal List
     "deals.title": "Negócios",

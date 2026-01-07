@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Calculator, TrendingUp, AlertTriangle } from "lucide-react";
+import { ArrowLeft, Calculator, TrendingUp, AlertTriangle, Home } from "lucide-react";
 import { useLocale } from "@/contexts/locale-context";
 import { formatCurrency } from "@/lib/i18n/currency";
 import { 
@@ -51,6 +51,15 @@ export default function NewDealPage() {
       address: "",
       zipCode: "",
       propertyType: "RESIDENTIAL",
+      // Property characteristics
+      area: null,
+      bedrooms: null,
+      bathrooms: null,
+      parkingSpaces: null,
+      lotSize: null,
+      yearBuilt: null,
+      condition: null,
+      // Financial
       purchasePrice: 0,
       estimatedCosts: 0,
       monthlyExpenses: 0,
@@ -99,6 +108,18 @@ export default function NewDealPage() {
     { value: "INDUSTRIAL", label: t("deal.propertyType.industrial") },
     { value: "MIXED", label: t("deal.propertyType.mixed") },
   ];
+
+  // Property conditions with translations
+  const PROPERTY_CONDITIONS = [
+    { value: "NEW", label: t("deal.condition.new") },
+    { value: "EXCELLENT", label: t("deal.condition.excellent") },
+    { value: "GOOD", label: t("deal.condition.good") },
+    { value: "FAIR", label: t("deal.condition.fair") },
+    { value: "NEEDS_WORK", label: t("deal.condition.needsWork") },
+  ];
+
+  // Area unit based on locale
+  const areaUnit = locale === "pt-BR" ? t("deal.area.unit") : t("deal.area.unitUS");
 
   const onSubmit = async (data: Record<string, unknown>) => {
     setGeneralError(null);
@@ -211,6 +232,118 @@ export default function NewDealPage() {
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Property Characteristics */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Home className="h-5 w-5" aria-hidden="true" />
+                {t("deal.section.characteristics")}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="area">{t("deal.area")} ({areaUnit})</Label>
+                  <input
+                    id="area"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                    placeholder={t("deal.area.placeholder")}
+                    {...register("area", { valueAsNumber: true })}
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="bedrooms">{t("deal.bedrooms")}</Label>
+                  <input
+                    id="bedrooms"
+                    type="number"
+                    min="0"
+                    max="50"
+                    className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                    placeholder="3"
+                    {...register("bedrooms", { valueAsNumber: true })}
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="bathrooms">{t("deal.bathrooms")}</Label>
+                  <input
+                    id="bathrooms"
+                    type="number"
+                    min="0"
+                    max="50"
+                    className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                    placeholder="2"
+                    {...register("bathrooms", { valueAsNumber: true })}
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="parkingSpaces">{t("deal.parkingSpaces")}</Label>
+                  <input
+                    id="parkingSpaces"
+                    type="number"
+                    min="0"
+                    max="100"
+                    className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                    placeholder="2"
+                    {...register("parkingSpaces", { valueAsNumber: true })}
+                  />
+                </div>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-3">
+                <div className="space-y-1.5">
+                  <Label htmlFor="lotSize">{t("deal.lotSize")} ({areaUnit})</Label>
+                  <input
+                    id="lotSize"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                    placeholder="250"
+                    {...register("lotSize", { valueAsNumber: true })}
+                  />
+                  <p className="text-xs text-muted-foreground">{t("deal.lotSize.description")}</p>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="yearBuilt">{t("deal.yearBuilt")}</Label>
+                  <input
+                    id="yearBuilt"
+                    type="number"
+                    min="1800"
+                    max={new Date().getFullYear() + 5}
+                    className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                    placeholder="2010"
+                    {...register("yearBuilt", { valueAsNumber: true })}
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="condition">{t("deal.condition")}</Label>
+                  <Select
+                    onValueChange={(value) => setValue("condition", value as "NEW" | "EXCELLENT" | "GOOD" | "FAIR" | "NEEDS_WORK")}
+                  >
+                    <SelectTrigger id="condition">
+                      <SelectValue placeholder={t("deal.condition.select")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {PROPERTY_CONDITIONS.map((cond) => (
+                        <SelectItem key={cond.value} value={cond.value}>
+                          {cond.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </CardContent>
           </Card>
