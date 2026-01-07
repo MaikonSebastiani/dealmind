@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -12,11 +13,13 @@ import {
   FinancingSection,
   NotesSection,
   PreviewPanel,
+  DocumentsSection,
 } from "./sections";
-import type { DealFormProps } from "./types";
+import type { DealFormProps, UploadedFile } from "./types";
 
 export function DealForm({ mode, dealId }: DealFormProps) {
   const router = useRouter();
+  const [documents, setDocuments] = useState<UploadedFile[]>([]);
   
   const {
     form,
@@ -30,7 +33,7 @@ export function DealForm({ mode, dealId }: DealFormProps) {
     isDownPaymentValid,
     loanTermOptions,
     onSubmit,
-  } = useDealForm({ mode, dealId });
+  } = useDealForm({ mode, dealId, documents });
 
   const {
     register,
@@ -41,6 +44,8 @@ export function DealForm({ mode, dealId }: DealFormProps) {
   } = form;
 
   const useFinancing = watch("useFinancing") || false;
+  const acquisitionType = watch("acquisitionType") || "TRADITIONAL";
+  const isAuction = acquisitionType === "AUCTION";
 
   // Loading state for edit mode
   if (isLoading) {
@@ -66,10 +71,12 @@ export function DealForm({ mode, dealId }: DealFormProps) {
     purchasePrice: watch("purchasePrice") || 0,
     estimatedCosts: watch("estimatedCosts") || 0,
     monthlyExpenses: watch("monthlyExpenses") || 0,
+    propertyDebts: watch("propertyDebts") || 0,
     estimatedTimeMonths: watch("estimatedTimeMonths") || 12,
     useFinancing,
     downPayment: watch("downPayment") || 0,
     closingCosts: watch("closingCosts") || 0,
+    isFirstProperty: watch("isFirstProperty") ?? true,
   };
 
   return (
@@ -114,6 +121,14 @@ export function DealForm({ mode, dealId }: DealFormProps) {
           <CharacteristicsSection {...sectionProps} areaUnit={areaUnit} />
           
           <FinancialSection {...sectionProps} />
+          
+          <DocumentsSection 
+            documents={documents}
+            onDocumentsChange={setDocuments}
+            isAuction={isAuction}
+            locale={locale}
+            t={t}
+          />
           
           <FinancingSection 
             {...sectionProps} 

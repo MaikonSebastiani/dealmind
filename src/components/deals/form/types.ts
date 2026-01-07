@@ -7,6 +7,22 @@ export type PropertyType = "RESIDENTIAL" | "COMMERCIAL" | "LAND" | "INDUSTRIAL" 
 // Property condition values
 export type PropertyCondition = "NEW" | "EXCELLENT" | "GOOD" | "FAIR" | "NEEDS_WORK" | null;
 
+// Acquisition type values
+export type AcquisitionType = "TRADITIONAL" | "AUCTION";
+
+// Document type values
+export type DocumentType = "PROPERTY_REGISTRY" | "AUCTION_NOTICE" | "CONTRACT" | "INSPECTION" | "OTHER";
+
+// Uploaded file interface
+export interface UploadedFile {
+  id?: string;
+  name: string;
+  url: string;
+  key: string;
+  size: number;
+  type: DocumentType;
+}
+
 // Form values interface
 export interface DealFormValues {
   name: string;
@@ -21,12 +37,17 @@ export interface DealFormValues {
   lotSize: number | null;
   yearBuilt: number | null;
   condition: PropertyCondition;
+  // Acquisition
+  acquisitionType: AcquisitionType;
+  registryNumber?: string;
   // Financial
   purchasePrice: number;
   estimatedCosts: number;
   monthlyExpenses: number;
+  propertyDebts: number;
   estimatedSalePrice: number;
   estimatedTimeMonths: number;
+  isFirstProperty: boolean;
   // Financing
   useFinancing: boolean;
   downPayment: number;
@@ -44,6 +65,7 @@ export interface DealMetrics {
   totalCashInvested: number;
   totalHoldingCosts: number;
   grossProceeds: number;
+  capitalGainsTax: number;
   estimatedProfit: number;
   estimatedROI: number;
 }
@@ -74,10 +96,12 @@ export interface PreviewPanelProps {
     purchasePrice: number;
     estimatedCosts: number;
     monthlyExpenses: number;
+    propertyDebts: number;
     estimatedTimeMonths: number;
     useFinancing: boolean;
     downPayment: number;
     closingCosts: number;
+    isFirstProperty: boolean;
   };
   locale: LocaleCode;
   t: (key: string) => string;
@@ -105,17 +129,32 @@ export interface DealResponse {
     lotSize: number | null;
     yearBuilt: number | null;
     condition: PropertyCondition;
+    // Acquisition
+    acquisitionType: AcquisitionType;
+    registryNumber: string | null;
+    // Financial
     purchasePrice: number;
     estimatedCosts: number;
     monthlyExpenses: number;
+    propertyDebts: number;
     estimatedSalePrice: number;
     estimatedTimeMonths: number;
+    isFirstProperty: boolean;
     useFinancing: boolean;
     downPayment: number | null;
     interestRate: number | null;
     loanTermYears: number | null;
     closingCosts: number | null;
     notes: string | null;
+    // Documents
+    documents?: Array<{
+      id: string;
+      name: string;
+      url: string;
+      fileKey: string;
+      size: number;
+      type: DocumentType;
+    }>;
   };
 }
 

@@ -3,8 +3,16 @@
 import { CurrencyInput } from "@/components/ui/currency-input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { INPUT_CLASS } from "../constants";
-import type { FormSectionProps } from "../types";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { INPUT_CLASS, ACQUISITION_TYPE_VALUES, ACQUISITION_TYPE_KEYS } from "../constants";
+import type { FormSectionProps, AcquisitionType } from "../types";
 
 export function FinancialSection({ 
   register, 
@@ -14,12 +22,35 @@ export function FinancialSection({
   locale, 
   t 
 }: FormSectionProps) {
+  const acquisitionType = watch("acquisitionType");
+  const isFirstProperty = watch("isFirstProperty");
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>{t("deal.section.financial")}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* Acquisition Type */}
+        <div className="space-y-2">
+          <Label htmlFor="acquisitionType">{t("deal.acquisitionType.label")}</Label>
+          <Select
+            value={acquisitionType || "TRADITIONAL"}
+            onValueChange={(value) => setValue("acquisitionType", value as AcquisitionType)}
+          >
+            <SelectTrigger id="acquisitionType">
+              <SelectValue placeholder={t("deal.acquisitionType.select")} />
+            </SelectTrigger>
+            <SelectContent>
+              {ACQUISITION_TYPE_VALUES.map((type) => (
+                <SelectItem key={type} value={type}>
+                  {t(ACQUISITION_TYPE_KEYS[type])}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
         <div className="grid gap-4 sm:grid-cols-2">
           <CurrencyInput
             id="purchasePrice"
@@ -37,7 +68,6 @@ export function FinancialSection({
             value={watch("estimatedCosts")}
             onValueChange={(value) => setValue("estimatedCosts", value, { shouldValidate: true })}
             error={errors.estimatedCosts?.message}
-            description={t("deal.renovationCosts.description")}
           />
 
           <CurrencyInput
@@ -47,7 +77,17 @@ export function FinancialSection({
             value={watch("monthlyExpenses")}
             onValueChange={(value) => setValue("monthlyExpenses", value, { shouldValidate: true })}
             error={errors.monthlyExpenses?.message}
-            description={t("deal.monthlyExpenses.description")}
+            description={t("deal.monthlyExpensesDescription")}
+          />
+
+          <CurrencyInput
+            id="propertyDebts"
+            label={t("deal.propertyDebts")}
+            locale={locale}
+            value={watch("propertyDebts")}
+            onValueChange={(value) => setValue("propertyDebts", value, { shouldValidate: true })}
+            error={errors.propertyDebts?.message}
+            description={t("deal.propertyDebtsDescription")}
           />
 
           <CurrencyInput
@@ -70,14 +110,25 @@ export function FinancialSection({
               placeholder="12"
               {...register("estimatedTimeMonths", { valueAsNumber: true })}
             />
-            <p className="text-xs text-muted-foreground">{t("deal.timeline.description")}</p>
+            <p className="text-xs text-muted-foreground">{t("deal.timelineDescription")}</p>
             {errors.estimatedTimeMonths && (
               <p className="text-sm text-destructive">{errors.estimatedTimeMonths.message}</p>
             )}
           </div>
         </div>
+
+        {/* First Property Checkbox */}
+        <div className="flex items-center space-x-2 pt-2 border-t">
+          <Checkbox
+            id="isFirstProperty"
+            checked={isFirstProperty ?? true}
+            onCheckedChange={(checked) => setValue("isFirstProperty", checked === true)}
+          />
+          <Label htmlFor="isFirstProperty" className="cursor-pointer text-sm">
+            {t("deal.isFirstProperty")}
+          </Label>
+        </div>
       </CardContent>
     </Card>
   );
 }
-

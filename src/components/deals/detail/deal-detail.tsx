@@ -9,6 +9,8 @@ import {
   FinancialBreakdown,
   DealInfo,
   NotesSection,
+  AIAnalysisSection,
+  DocumentsSection,
 } from "./sections";
 import type { DealDetailProps } from "./types";
 
@@ -20,13 +22,16 @@ export function DealDetail({ deal }: DealDetailProps) {
     purchasePrice: deal.purchasePrice,
     estimatedCosts: deal.estimatedCosts,
     monthlyExpenses: deal.monthlyExpenses,
+    propertyDebts: deal.propertyDebts ?? 0,
     estimatedSalePrice: deal.estimatedSalePrice,
     estimatedTimeMonths: deal.estimatedTimeMonths,
+    isFirstProperty: deal.isFirstProperty,
     useFinancing: deal.useFinancing,
     downPayment: deal.downPayment ?? 0,
     interestRate: deal.interestRate ?? 0,
     loanTermYears: deal.loanTermYears ?? 30,
     closingCosts: deal.closingCosts ?? 0,
+    locale,
   });
 
   // Common props for sections
@@ -45,6 +50,22 @@ export function DealDetail({ deal }: DealDetailProps) {
         <FinancialBreakdown {...metricsProps} />
         <DealInfo {...sectionProps} />
       </div>
+
+      {/* Documents Section */}
+      {deal.documents && deal.documents.length > 0 && (
+        <DocumentsSection 
+          documents={deal.documents} 
+          locale={locale} 
+          t={t} 
+        />
+      )}
+
+      <AIAnalysisSection 
+        dealId={deal.id} 
+        dealStatus={deal.status} 
+        locale={locale} 
+        t={t} 
+      />
 
       <NotesSection deal={deal} t={t} />
     </div>

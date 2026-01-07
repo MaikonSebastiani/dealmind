@@ -25,6 +25,9 @@ const optionalYear = z.preprocess(
   z.number().int().min(1800).max(new Date().getFullYear() + 5).optional().nullable()
 );
 
+// Acquisition type enum
+const AcquisitionTypeEnum = z.enum(["TRADITIONAL", "AUCTION"]);
+
 // Base schema without refinements
 const baseDealSchema = z.object({
   name: z
@@ -60,6 +63,14 @@ const baseDealSchema = z.object({
   yearBuilt: optionalYear,
   condition: PropertyConditionEnum.optional().nullable(),
   
+  // Acquisition data
+  acquisitionType: AcquisitionTypeEnum.default("TRADITIONAL"),
+  registryNumber: z
+    .string()
+    .max(50, "Registry number must be less than 50 characters")
+    .optional()
+    .or(z.literal("")),
+  
   // Financial Inputs
   purchasePrice: z
     .number()
@@ -72,6 +83,11 @@ const baseDealSchema = z.object({
     .number()
     .min(0, "Monthly expenses cannot be negative")
     .max(9999999, "Monthly expenses is too high"),
+  propertyDebts: z
+    .number()
+    .min(0, "Property debts cannot be negative")
+    .max(999999999, "Property debts is too high")
+    .default(0),
   estimatedSalePrice: z
     .number()
     .positive("Sale price must be positive")
@@ -81,6 +97,7 @@ const baseDealSchema = z.object({
     .int()
     .min(1, "Time must be at least 1 month")
     .max(60, "Time must be less than 5 years"), // Reduced for flipping focus
+  isFirstProperty: z.boolean().default(true),
   
   // Financing fields (optional)
   useFinancing: z.boolean().default(false),

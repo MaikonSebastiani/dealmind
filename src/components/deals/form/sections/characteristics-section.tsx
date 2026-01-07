@@ -140,7 +140,7 @@ export function CharacteristicsSection({
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="condition">{t("deal.condition")}</Label>
+            <Label htmlFor="condition">{t("deal.condition.label")}</Label>
             <Select
               value={watch("condition") || ""}
               onValueChange={(value) => setValue("condition", value as PropertyCondition)}

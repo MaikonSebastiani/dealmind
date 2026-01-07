@@ -53,10 +53,13 @@ export async function POST(request: Request) {
     const data = result.data;
 
     // Use centralized calculation utility
+    // Note: locale and isFirstProperty affect profit calculation only in frontend preview
+    // Backend stores gross profit for now (before taxes)
     const metrics = calculateDealMetrics({
       purchasePrice: data.purchasePrice,
       estimatedCosts: data.estimatedCosts || 0,
       monthlyExpenses: data.monthlyExpenses || 0,
+      propertyDebts: data.propertyDebts || 0,
       estimatedSalePrice: data.estimatedSalePrice,
       estimatedTimeMonths: data.estimatedTimeMonths || 12,
       useFinancing: data.useFinancing,
@@ -64,43 +67,71 @@ export async function POST(request: Request) {
       interestRate: data.interestRate,
       loanTermYears: data.loanTermYears,
       closingCosts: data.closingCosts,
+      isFirstProperty: data.isFirstProperty ?? false,
+      locale: "pt-BR", // Default to Brazil for tax calculation
     });
 
-    const deal = await prisma.deal.create({
-      data: {
-        userId: session.user.id,
-        name: data.name,
-        address: data.address,
-        zipCode: data.zipCode,
-        propertyType: data.propertyType,
-        // Property characteristics
-        area: data.area,
-        bedrooms: data.bedrooms,
-        bathrooms: data.bathrooms,
-        parkingSpaces: data.parkingSpaces,
-        lotSize: data.lotSize,
-        yearBuilt: data.yearBuilt,
-        condition: data.condition,
-        // Financial
-        purchasePrice: data.purchasePrice,
-        estimatedCosts: data.estimatedCosts || 0,
-        monthlyExpenses: data.monthlyExpenses || 0,
-        estimatedSalePrice: data.estimatedSalePrice,
-        estimatedTimeMonths: data.estimatedTimeMonths || 12,
-        // Financing fields
-        useFinancing: data.useFinancing ?? false,
-        downPayment: data.useFinancing ? data.downPayment : null,
-        loanAmount: data.useFinancing ? metrics.loanAmount : null,
-        interestRate: data.useFinancing ? data.interestRate : null,
-        loanTermYears: data.useFinancing ? data.loanTermYears : null,
-        monthlyPayment: data.useFinancing ? metrics.monthlyPayment : null,
-        closingCosts: data.useFinancing ? data.closingCosts : null,
-        // Calculated fields
-        notes: data.notes,
-        estimatedProfit: metrics.estimatedProfit,
-        estimatedROI: metrics.estimatedROI,
-        status: "ANALYZING",
-      },
+    // Create deal with documents in a transaction
+    const deal = await prisma.$transaction(async (tx) => {
+      // Create the deal
+      const createdDeal = await tx.deal.create({
+        data: {
+          userId: session.user.id,
+          name: data.name,
+          address: data.address,
+          zipCode: data.zipCode,
+          propertyType: data.propertyType,
+          // Property characteristics
+          area: data.area,
+          bedrooms: data.bedrooms,
+          bathrooms: data.bathrooms,
+          parkingSpaces: data.parkingSpaces,
+          lotSize: data.lotSize,
+          yearBuilt: data.yearBuilt,
+          condition: data.condition,
+          // Acquisition data
+          acquisitionType: data.acquisitionType || "TRADITIONAL",
+          registryNumber: data.registryNumber,
+          // Financial
+          purchasePrice: data.purchasePrice,
+          estimatedCosts: data.estimatedCosts || 0,
+          monthlyExpenses: data.monthlyExpenses || 0,
+          propertyDebts: data.propertyDebts || 0,
+          estimatedSalePrice: data.estimatedSalePrice,
+          estimatedTimeMonths: data.estimatedTimeMonths || 12,
+          isFirstProperty: data.isFirstProperty ?? true,
+          // Financing fields
+          useFinancing: data.useFinancing ?? false,
+          downPayment: data.useFinancing ? data.downPayment : null,
+          loanAmount: data.useFinancing ? metrics.loanAmount : null,
+          interestRate: data.useFinancing ? data.interestRate : null,
+          loanTermYears: data.useFinancing ? data.loanTermYears : null,
+          monthlyPayment: data.useFinancing ? metrics.monthlyPayment : null,
+          closingCosts: data.useFinancing ? data.closingCosts : null,
+          // Calculated fields
+          notes: data.notes,
+          estimatedProfit: metrics.estimatedProfit,
+          estimatedROI: metrics.estimatedROI,
+          status: "ANALYZING",
+        },
+      });
+
+      // Create documents if any
+      if (body.documents && Array.isArray(body.documents) && body.documents.length > 0) {
+        await tx.document.createMany({
+          data: body.documents.map((doc: { name: string; url: string; fileKey: string; size: number; type: string }) => ({
+            dealId: createdDeal.id,
+            name: doc.name,
+            url: doc.url,
+            fileKey: doc.fileKey,
+            size: doc.size,
+            mimeType: doc.name.endsWith(".pdf") ? "application/pdf" : "image/*",
+            type: doc.type,
+          })),
+        });
+      }
+
+      return createdDeal;
     });
 
     return NextResponse.json(

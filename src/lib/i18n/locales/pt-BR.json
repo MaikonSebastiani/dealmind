@@ -55,9 +55,17 @@
     },
     "purchasePrice": "Preço de Compra",
     "renovationCosts": "Custos de Reforma",
-    "renovationCostsDescription": "Custos únicos (reforma, reparos, cartório)",
     "monthlyExpenses": "Despesas Mensais",
     "monthlyExpensesDescription": "Condomínio, IPTU, seguro, manutenção",
+    "propertyDebts": "Dívidas do Imóvel",
+    "propertyDebtsDescription": "IPTU atrasado, condomínio em aberto, etc.",
+    "isFirstProperty": "Este é o primeiro imóvel no meu nome",
+    "acquisitionType": {
+      "label": "Tipo de Aquisição",
+      "select": "Selecione o tipo",
+      "traditional": "Mercado Tradicional",
+      "auction": "Leilão"
+    },
     "estimatedSalePrice": "Preço de Venda Estimado",
     "timeline": "Prazo (meses)",
     "timelineDescription": "Usado para calcular despesas mensais totais",
@@ -71,7 +79,7 @@
       "loanTerm": "Prazo (anos)",
       "monthlyPayment": "Parcela Mensal",
       "closingCosts": "Custos de Fechamento",
-      "closingCostsDescription": "ITBI, escritura, registro (3-5%)"
+      "closingCostsDescription": "ITBI, escritura, registro (0,5-5%)"
     },
     "notes": "Observações Adicionais",
     "notesPlaceholder": "Informações adicionais sobre este negócio...",
@@ -89,14 +97,54 @@
     "lotSizeDescription": "Área do terreno (opcional para apartamentos)",
     "yearBuilt": "Ano de Construção",
     "condition": {
-      "label": "Estado",
+      "label": "Estado do Imóvel",
       "select": "Selecione o estado",
       "new": "Novo/Na Planta",
       "excellent": "Excelente",
       "good": "Bom",
       "fair": "Regular",
       "needsWork": "Precisa de Reforma"
-    }
+    },
+    "section": {
+      "basicInfo": "Informações Básicas",
+      "financial": "Detalhes Financeiros",
+      "financing": "Financiamento",
+      "notes": "Observações",
+      "preview": "Prévia do Investimento",
+      "characteristics": "Características do Imóvel",
+      "auction": "Dados do Leilão",
+      "documents": "Documentos"
+    },
+    "auction": {
+      "isAuction": "Este imóvel é de leilão",
+      "type": "Tipo de Leilão",
+      "selectType": "Selecione o tipo",
+      "round": "Praça",
+      "selectRound": "Selecione a praça",
+      "appraisalValue": "Valor de Avaliação",
+      "appraisalValueHint": "Valor oficial da avaliação do imóvel",
+      "minimumBid": "Lance Mínimo",
+      "minimumBidHint": "Valor mínimo para participar",
+      "date": "Data do Leilão",
+      "fee": "Comissão do Leiloeiro",
+      "feeHint": "Geralmente 5% do valor arrematado",
+      "discount": "Desconto sobre avaliação",
+      "discountHint": "Diferença entre avaliação e lance mínimo"
+    },
+    "registryNumber": "Número da Matrícula",
+    "registryNumberPlaceholder": "ex: 123456",
+    "registryNumberHint": "Número de registro no cartório de imóveis"
+  },
+  "documents": {
+    "recommended": "Documentos Recomendados:",
+    "registry": "Matrícula do imóvel (certidão atualizada)",
+    "auctionNotice": "Edital do leilão",
+    "dropzone": "Arraste arquivos ou clique para selecionar",
+    "allowedTypes": "PDF ou imagens (max 16MB)",
+    "uploaded": "Documentos Enviados",
+    "uploadError": "Erro ao enviar arquivo",
+    "missingAuctionNotice": "Edital não anexado",
+    "auctionNoticeHint": "Para imóveis de leilão, é importante anexar o edital para análise completa."
   },
   "preview": {
     "purchasePrice": "Preço de Compra",
@@ -107,6 +155,9 @@
     "salePrice": "Preço de Venda",
     "loanPayoff": "- Quitação do Financiamento",
     "estimatedProfit": "Lucro Estimado",
+    "capitalGainsTax": "Imposto Ganho de Capital",
+    "netProfit": "Lucro Líquido",
+    "capitalGainsTaxWarning": "* Considere impostos sobre ganho de capital na venda",
     "roi": "ROI sobre Capital",
     "monthlyPayment": "Parcela Mensal"
   },
@@ -145,7 +196,8 @@
     "timeline": "Prazo",
     "created": "Criado em",
     "lastUpdated": "Última Atualização",
-    "months": "meses"
+    "months": "meses",
+    "days": "dias"
   },
   "filter": {
     "searchPlaceholder": "Buscar por nome ou endereço...",
@@ -166,6 +218,48 @@
     "clear": "Limpar filtros",
     "results": "{count} negócios encontrados",
     "noResults": "Nenhum negócio corresponde aos filtros"
+  },
+  "analysis": {
+    "title": "Análise IA",
+    "noAnalysis": "Nenhuma análise de IA disponível. Execute uma análise para obter insights sobre este negócio.",
+    "runAnalysis": "Executar Análise IA",
+    "analyzing": "Analisando...",
+    "refresh": "Atualizar",
+    "error": "Falha ao executar análise. Por favor, tente novamente.",
+    "summary": "Resumo",
+    "risks": "Avaliação de Riscos",
+    "insights": "Observações",
+    "marketAnalysis": "Análise de Mercado",
+    "marketValue": "Valor de Mercado Est.",
+    "pricePerArea": "Preço por Área",
+    "regionTrend": "Tendência da Região",
+    "daysOnMarket": "Média de Dias no Mercado",
+    "scenarios": "Cenários de Investimento",
+    "conservative": "Conservador",
+    "moderate": "Moderado",
+    "optimistic": "Otimista",
+    "profit": "Lucro",
+    "timeline": "Prazo",
+    "probability": "Probabilidade",
+    "assumptions": "Premissas dos Cenários",
+    "trend": {
+      "rising": "Em Alta",
+      "stable": "Estável",
+      "falling": "Em Queda"
+    },
+    "neighborhoodProfile": "Perfil do Bairro",
+    "strengths": "Pontos Fortes",
+    "challenges": "Pontos de Atenção",
+    "recentDevelopments": "Desenvolvimentos Recentes",
+    "marketContext": "Contexto de Mercado",
+    "buyerProfile": "Perfil do Comprador Típico",
+    "infrastructure": "Infraestrutura Próxima",
+    "verification": "Verificações e Perguntas",
+    "checkpoints": "Itens para Verificar",
+    "questionsToAsk": "Perguntas para o Vendedor",
+    "hiddenCosts": "Custos Potenciais Ocultos",
+    "alerts": "Pontos de Atenção",
+    "disclaimer": "Esta análise é apenas informativa e não constitui aconselhamento de investimento. A decisão final é sempre do investidor. Verifique todas as informações de forma independente antes de prosseguir."
   }
 }
 

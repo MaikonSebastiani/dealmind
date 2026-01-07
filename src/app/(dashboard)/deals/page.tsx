@@ -71,6 +71,7 @@ export default async function DealsPage({ searchParams }: PageProps) {
     purchasePrice: Number(deal.purchasePrice),
     estimatedCosts: Number(deal.estimatedCosts),
     monthlyExpenses: Number(deal.monthlyExpenses),
+    propertyDebts: deal.propertyDebts !== null ? Number(deal.propertyDebts) : null,
     estimatedSalePrice: Number(deal.estimatedSalePrice),
     estimatedProfit: deal.estimatedProfit ? Number(deal.estimatedProfit) : null,
     estimatedROI: deal.estimatedROI ? Number(deal.estimatedROI) : null,

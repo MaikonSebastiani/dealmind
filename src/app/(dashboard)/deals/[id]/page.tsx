@@ -18,6 +18,11 @@ export default async function DealPage({ params }: PageProps) {
 
   const deal = await prisma.deal.findUnique({
     where: { id },
+    include: {
+      documents: {
+        orderBy: { createdAt: "desc" },
+      },
+    },
   });
 
   if (!deal) {
@@ -38,6 +43,7 @@ export default async function DealPage({ params }: PageProps) {
     purchasePrice: Number(deal.purchasePrice),
     estimatedCosts: Number(deal.estimatedCosts),
     monthlyExpenses: Number(deal.monthlyExpenses),
+    propertyDebts: deal.propertyDebts !== null ? Number(deal.propertyDebts) : null,
     estimatedSalePrice: Number(deal.estimatedSalePrice),
     estimatedProfit: deal.estimatedProfit ? Number(deal.estimatedProfit) : null,
     estimatedROI: deal.estimatedROI ? Number(deal.estimatedROI) : null,
@@ -46,6 +52,16 @@ export default async function DealPage({ params }: PageProps) {
     interestRate: deal.interestRate ? Number(deal.interestRate) : null,
     monthlyPayment: deal.monthlyPayment ? Number(deal.monthlyPayment) : null,
     closingCosts: deal.closingCosts ? Number(deal.closingCosts) : null,
+    // Documents
+    documents: deal.documents.map(doc => ({
+      id: doc.id,
+      name: doc.name,
+      type: doc.type,
+      url: doc.url,
+      size: doc.size,
+      mimeType: doc.mimeType,
+      createdAt: doc.createdAt,
+    })),
   };
 
   return <DealDetailClient deal={serializedDeal} />;

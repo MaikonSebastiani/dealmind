@@ -1,4 +1,4 @@
-import type { PropertyType, PropertyCondition, DealFormValues } from "./types";
+import type { PropertyType, PropertyCondition, AcquisitionType, DealFormValues } from "./types";
 
 // Property types configuration
 export const PROPERTY_TYPE_VALUES: PropertyType[] = [
@@ -16,6 +16,12 @@ export const PROPERTY_CONDITION_VALUES: (Exclude<PropertyCondition, null>)[] = [
   "GOOD",
   "FAIR",
   "NEEDS_WORK",
+];
+
+// Acquisition types configuration
+export const ACQUISITION_TYPE_VALUES: AcquisitionType[] = [
+  "TRADITIONAL",
+  "AUCTION",
 ];
 
 // Translation keys for property types
@@ -36,6 +42,12 @@ export const PROPERTY_CONDITION_KEYS: Record<Exclude<PropertyCondition, null>, s
   NEEDS_WORK: "deal.condition.needsWork",
 };
 
+// Translation keys for acquisition types
+export const ACQUISITION_TYPE_KEYS: Record<AcquisitionType, string> = {
+  TRADITIONAL: "deal.acquisitionType.traditional",
+  AUCTION: "deal.acquisitionType.auction",
+};
+
 // Default form values
 export const getDefaultFormValues = (defaultInterestRate: number): DealFormValues => ({
   name: "",
@@ -50,12 +62,17 @@ export const getDefaultFormValues = (defaultInterestRate: number): DealFormValue
   lotSize: null,
   yearBuilt: null,
   condition: null,
+  // Acquisition
+  acquisitionType: "TRADITIONAL",
+  registryNumber: undefined,
   // Financial
   purchasePrice: 0,
   estimatedCosts: 0,
   monthlyExpenses: 0,
+  propertyDebts: 0,
   estimatedSalePrice: 0,
   estimatedTimeMonths: 12,
+  isFirstProperty: false,
   // Financing
   useFinancing: false,
   downPayment: 0,

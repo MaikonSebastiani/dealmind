@@ -1,5 +1,16 @@
 import type { LocaleCode } from "@/contexts/locale-context";
 
+// Document interface
+export interface DealDocument {
+  id: string;
+  name: string;
+  type: string;
+  url: string;
+  size: number;
+  mimeType: string;
+  createdAt: Date;
+}
+
 // Deal interface for detail view
 export interface Deal {
   id: string;
@@ -16,12 +27,17 @@ export interface Deal {
   lotSize: number | null;
   yearBuilt: number | null;
   condition: string | null;
+  // Acquisition
+  acquisitionType: string;
+  registryNumber: string | null;
   // Financial
   purchasePrice: number;
   estimatedCosts: number;
   monthlyExpenses: number;
+  propertyDebts: number | null;
   estimatedSalePrice: number;
   estimatedTimeMonths: number;
+  isFirstProperty: boolean;
   useFinancing: boolean;
   downPayment: number | null;
   loanAmount: number | null;
@@ -34,11 +50,17 @@ export interface Deal {
   notes: string | null;
   createdAt: Date;
   updatedAt: Date;
+  // Documents
+  documents?: DealDocument[];
 }
 
 // Metrics calculated from deal data
 export interface DealMetrics {
   totalCashInvested: number;
+  totalHoldingCosts: number;
+  totalCostAtSale: number;
+  grossProceeds: number;
+  capitalGainsTax: number;
   estimatedProfit: number;
   estimatedROI: number;
   monthlyPayment: number;

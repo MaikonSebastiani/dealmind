@@ -55,9 +55,17 @@
     },
     "purchasePrice": "Purchase Price",
     "renovationCosts": "Renovation/Repair Costs",
-    "renovationCostsDescription": "One-time costs (renovation, repairs, closing)",
     "monthlyExpenses": "Monthly Expenses",
     "monthlyExpensesDescription": "HOA, taxes, insurance, maintenance",
+    "propertyDebts": "Property Debts",
+    "propertyDebtsDescription": "Back taxes, unpaid HOA fees, liens, etc.",
+    "isFirstProperty": "This is the first property in my name",
+    "acquisitionType": {
+      "label": "Acquisition Type",
+      "select": "Select type",
+      "traditional": "Traditional Market",
+      "auction": "Auction"
+    },
     "estimatedSalePrice": "Estimated Sale Price",
     "timeline": "Timeline (months)",
     "timelineDescription": "Used to calculate total monthly expenses",
@@ -89,14 +97,54 @@
     "lotSizeDescription": "Land area (optional for apartments)",
     "yearBuilt": "Year Built",
     "condition": {
-      "label": "Condition",
+      "label": "Property Condition",
       "select": "Select condition",
       "new": "New/Under Construction",
       "excellent": "Excellent",
       "good": "Good",
       "fair": "Fair",
       "needsWork": "Needs Work"
-    }
+    },
+    "section": {
+      "basicInfo": "Basic Information",
+      "financial": "Financial Details",
+      "financing": "Financing",
+      "notes": "Notes",
+      "preview": "Investment Preview",
+      "characteristics": "Property Characteristics",
+      "auction": "Auction Data",
+      "documents": "Documents"
+    },
+    "auction": {
+      "isAuction": "This property is from an auction",
+      "type": "Auction Type",
+      "selectType": "Select type",
+      "round": "Auction Round",
+      "selectRound": "Select round",
+      "appraisalValue": "Appraisal Value",
+      "appraisalValueHint": "Official property appraisal value",
+      "minimumBid": "Minimum Bid",
+      "minimumBidHint": "Minimum amount to participate",
+      "date": "Auction Date",
+      "fee": "Auctioneer Fee",
+      "feeHint": "Usually 5-10% of the winning bid",
+      "discount": "Discount from appraisal",
+      "discountHint": "Difference between appraisal and minimum bid"
+    },
+    "registryNumber": "Registry Number",
+    "registryNumberPlaceholder": "e.g., 123456",
+    "registryNumberHint": "Property registration number"
+  },
+  "documents": {
+    "recommended": "Recommended Documents:",
+    "registry": "Property registry (updated certificate)",
+    "auctionNotice": "Auction notice/terms",
+    "dropzone": "Drag files or click to select",
+    "allowedTypes": "PDF or images (max 16MB)",
+    "uploaded": "Uploaded Documents",
+    "uploadError": "Error uploading file",
+    "missingAuctionNotice": "Auction notice not attached",
+    "auctionNoticeHint": "For auction properties, it's important to attach the auction notice for complete analysis."
   },
   "preview": {
     "purchasePrice": "Purchase Price",
@@ -107,6 +155,9 @@
     "salePrice": "Sale Price",
     "loanPayoff": "- Loan Payoff",
     "estimatedProfit": "Estimated Profit",
+    "capitalGainsTax": "Capital Gains Tax",
+    "netProfit": "Net Profit",
+    "capitalGainsTaxWarning": "* Consider capital gains taxes at sale",
     "roi": "Cash-on-Cash ROI",
     "monthlyPayment": "Monthly Payment"
   },
@@ -145,7 +196,8 @@
     "timeline": "Timeline",
     "created": "Created",
     "lastUpdated": "Last Updated",
-    "months": "months"
+    "months": "months",
+    "days": "days"
   },
   "filter": {
     "searchPlaceholder": "Search by name or address...",
@@ -166,6 +218,48 @@
     "clear": "Clear filters",
     "results": "{count} deals found",
     "noResults": "No deals match your filters"
+  },
+  "analysis": {
+    "title": "AI Analysis",
+    "noAnalysis": "No AI analysis available yet. Run an analysis to get insights about this deal.",
+    "runAnalysis": "Run AI Analysis",
+    "analyzing": "Analyzing...",
+    "refresh": "Refresh",
+    "error": "Failed to run analysis. Please try again.",
+    "summary": "Summary",
+    "risks": "Risk Assessment",
+    "insights": "Key Findings",
+    "marketAnalysis": "Market Analysis",
+    "marketValue": "Est. Market Value",
+    "pricePerArea": "Price per Area",
+    "regionTrend": "Region Trend",
+    "daysOnMarket": "Avg. Days on Market",
+    "scenarios": "Investment Scenarios",
+    "conservative": "Conservative",
+    "moderate": "Moderate",
+    "optimistic": "Optimistic",
+    "profit": "Profit",
+    "timeline": "Timeline",
+    "probability": "Probability",
+    "assumptions": "Scenario Assumptions",
+    "trend": {
+      "rising": "Rising",
+      "stable": "Stable",
+      "falling": "Falling"
+    },
+    "neighborhoodProfile": "Neighborhood Profile",
+    "strengths": "Strengths",
+    "challenges": "Challenges",
+    "recentDevelopments": "Recent Developments",
+    "marketContext": "Market Context",
+    "buyerProfile": "Typical Buyer Profile",
+    "infrastructure": "Nearby Infrastructure",
+    "verification": "Verification & Questions",
+    "checkpoints": "Items to Verify",
+    "questionsToAsk": "Questions for the Seller",
+    "hiddenCosts": "Potential Hidden Costs",
+    "alerts": "Important Considerations",
+    "disclaimer": "This analysis is for informational purposes only and does not constitute investment advice. The final decision is always the investor's. Verify all information independently before proceeding."
   }
 }
 

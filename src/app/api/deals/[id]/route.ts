@@ -127,8 +127,10 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     const purchasePrice = data.purchasePrice ?? Number(existingDeal.purchasePrice);
     const estimatedCosts = data.estimatedCosts ?? Number(existingDeal.estimatedCosts);
     const monthlyExpenses = data.monthlyExpenses ?? Number(existingDeal.monthlyExpenses);
+    const propertyDebts = data.propertyDebts ?? Number(existingDeal.propertyDebts || 0);
     const estimatedSalePrice = data.estimatedSalePrice ?? Number(existingDeal.estimatedSalePrice);
     const estimatedTimeMonths = data.estimatedTimeMonths ?? existingDeal.estimatedTimeMonths;
+    const isFirstProperty = data.isFirstProperty ?? existingDeal.isFirstProperty ?? false;
     const useFinancing = data.useFinancing ?? existingDeal.useFinancing;
     const downPayment = data.downPayment ?? (existingDeal.downPayment ? Number(existingDeal.downPayment) : 0);
     const interestRate = data.interestRate ?? (existingDeal.interestRate ? Number(existingDeal.interestRate) : 0);
@@ -140,6 +142,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
       purchasePrice,
       estimatedCosts,
       monthlyExpenses,
+      propertyDebts,
       estimatedSalePrice,
       estimatedTimeMonths,
       useFinancing,
@@ -147,6 +150,8 @@ export async function PATCH(request: Request, { params }: RouteParams) {
       interestRate,
       loanTermYears,
       closingCosts,
+      isFirstProperty,
+      locale: "pt-BR",
     });
 
     const deal = await prisma.deal.update({

@@ -12,11 +12,12 @@ import {
   getLoanTermOptions 
 } from "@/lib/calculations/financing";
 import { getDefaultFormValues } from "./constants";
-import type { DealFormMode, DealFormValues, DealMetrics, DealResponse } from "./types";
+import type { DealFormMode, DealFormValues, DealMetrics, DealResponse, UploadedFile } from "./types";
 
 interface UseDealFormOptions {
   mode: DealFormMode;
   dealId?: Promise<{ id: string }>;
+  documents?: UploadedFile[];
 }
 
 interface UseDealFormReturn {
@@ -42,7 +43,7 @@ interface UseDealFormReturn {
   formatCurrencyValue: (value: number) => string;
 }
 
-export function useDealForm({ mode, dealId }: UseDealFormOptions): UseDealFormReturn {
+export function useDealForm({ mode, dealId, documents = [] }: UseDealFormOptions): UseDealFormReturn {
   const router = useRouter();
   const { t, locale } = useLocale();
   const [isLoading, setIsLoading] = useState(mode === "edit");
@@ -68,6 +69,7 @@ export function useDealForm({ mode, dealId }: UseDealFormOptions): UseDealFormRe
     purchasePrice: watch("purchasePrice") || 0,
     estimatedCosts: watch("estimatedCosts") || 0,
     monthlyExpenses: watch("monthlyExpenses") || 0,
+    propertyDebts: watch("propertyDebts") || 0,
     estimatedSalePrice: watch("estimatedSalePrice") || 0,
     estimatedTimeMonths: watch("estimatedTimeMonths") || 12,
     useFinancing: watch("useFinancing") || false,
@@ -75,6 +77,8 @@ export function useDealForm({ mode, dealId }: UseDealFormOptions): UseDealFormRe
     interestRate: watch("interestRate") || defaultInterestRate,
     loanTermYears: watch("loanTermYears") || 30,
     closingCosts: watch("closingCosts") || 0,
+    isFirstProperty: watch("isFirstProperty") ?? false,
+    locale,
   };
 
   // Calculate metrics
@@ -117,11 +121,17 @@ export function useDealForm({ mode, dealId }: UseDealFormOptions): UseDealFormRe
           lotSize: deal.lotSize,
           yearBuilt: deal.yearBuilt,
           condition: deal.condition,
+          // Acquisition data
+          acquisitionType: deal.acquisitionType || "TRADITIONAL",
+          registryNumber: deal.registryNumber || undefined,
+          // Financial
           purchasePrice: Number(deal.purchasePrice),
           estimatedCosts: Number(deal.estimatedCosts),
           monthlyExpenses: Number(deal.monthlyExpenses),
+          propertyDebts: Number(deal.propertyDebts || 0),
           estimatedSalePrice: Number(deal.estimatedSalePrice),
           estimatedTimeMonths: deal.estimatedTimeMonths,
+          isFirstProperty: deal.isFirstProperty ?? true,
           useFinancing: deal.useFinancing,
           downPayment: deal.downPayment ? Number(deal.downPayment) : 0,
           interestRate: deal.interestRate ? Number(deal.interestRate) : defaultInterestRate,
@@ -148,10 +158,22 @@ export function useDealForm({ mode, dealId }: UseDealFormOptions): UseDealFormRe
       const url = mode === "create" ? "/api/deals" : `/api/deals/${resolvedDealId}`;
       const method = mode === "create" ? "POST" : "PATCH";
 
+      // Prepare request body with documents
+      const requestBody = {
+        ...data,
+        documents: documents.map(doc => ({
+          name: doc.name,
+          url: doc.url,
+          fileKey: doc.key,
+          size: doc.size,
+          type: doc.type,
+        })),
+      };
+
       const response = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify(requestBody),
       });
 
       const result = await response.json();

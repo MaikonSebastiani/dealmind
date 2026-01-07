@@ -1,7 +1,7 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { TrendingUp } from "lucide-react";
+import { TrendingUp, AlertCircle } from "lucide-react";
 import { formatCurrency } from "@/lib/i18n/currency";
 import type { PreviewPanelProps } from "../types";
 
@@ -10,11 +10,13 @@ export function PreviewPanel({ metrics, values, locale, t }: PreviewPanelProps) 
   const { 
     purchasePrice, 
     estimatedCosts, 
-    monthlyExpenses, 
+    monthlyExpenses,
+    propertyDebts,
     estimatedTimeMonths, 
     useFinancing, 
     downPayment, 
-    closingCosts 
+    closingCosts,
+    isFirstProperty,
   } = values;
 
   return (
@@ -114,8 +116,20 @@ export function PreviewPanel({ metrics, values, locale, t }: PreviewPanelProps) 
             </div>
           )}
           
+          {/* Capital Gains Tax (Brazil only, non-first property) */}
+          {!isFirstProperty && locale === "pt-BR" && metrics.capitalGainsTax > 0 && (
+            <div className="flex justify-between text-sm text-red-500">
+              <span>{locale === "pt-BR" ? "Imposto Ganho Capital (15%)" : "Capital Gains Tax"}</span>
+              <span>- {fmt(metrics.capitalGainsTax)}</span>
+            </div>
+          )}
+          
           <div className="flex justify-between font-medium pt-2 border-t">
-            <span>{t("preview.estimatedProfit")}</span>
+            <span>
+              {locale === "pt-BR" && !isFirstProperty 
+                ? "Lucro Líquido" 
+                : t("preview.estimatedProfit")}
+            </span>
             <span className={metrics.estimatedProfit >= 0 ? "text-green-600" : "text-red-600"}>
               {fmt(metrics.estimatedProfit)}
             </span>
@@ -139,6 +153,25 @@ export function PreviewPanel({ metrics, values, locale, t }: PreviewPanelProps) 
               {metrics.estimatedROI.toFixed(1)}%
             </span>
           </div>
+          
+          {/* Sales tax warning - Only show for USA since Brazil is auto-calculated */}
+          {!isFirstProperty && locale === "en-US" && (
+            <div className="mt-3 pt-3 border-t border-border/50 flex items-start gap-2 text-xs text-amber-600">
+              <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
+              <span>* Consider capital gains taxes at sale</span>
+            </div>
+          )}
+
+          {/* Property debts warning */}
+          {propertyDebts > 0 && (
+            <div className="mt-2 flex items-start gap-2 text-xs text-muted-foreground">
+              <span>
+                {locale === "pt-BR" 
+                  ? `* Dívidas do imóvel: ${fmt(propertyDebts)} (incluídas no investimento)`
+                  : `* Property debts: ${fmt(propertyDebts)} (included in investment)`}
+              </span>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>

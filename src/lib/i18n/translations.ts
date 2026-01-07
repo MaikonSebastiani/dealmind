@@ -219,5 +219,34 @@ export const keyMapping: Record<string, string> = {
   "filter.clear": "filter.clear",
   "filter.results": "filter.results",
   "filter.noResults": "filter.noResults",
+
+  // Analysis
+  "analysis.title": "analysis.title",
+  "analysis.noAnalysis": "analysis.noAnalysis",
+  "analysis.runAnalysis": "analysis.runAnalysis",
+  "analysis.analyzing": "analysis.analyzing",
+  "analysis.refresh": "analysis.refresh",
+  "analysis.error": "analysis.error",
+  "analysis.summary": "analysis.summary",
+  "analysis.risks": "analysis.risks",
+  "analysis.insights": "analysis.insights",
+  "analysis.marketAnalysis": "analysis.marketAnalysis",
+  "analysis.marketValue": "analysis.marketValue",
+  "analysis.pricePerArea": "analysis.pricePerArea",
+  "analysis.regionTrend": "analysis.regionTrend",
+  "analysis.daysOnMarket": "analysis.daysOnMarket",
+  "analysis.scenarios": "analysis.scenarios",
+  "analysis.conservative": "analysis.conservative",
+  "analysis.moderate": "analysis.moderate",
+  "analysis.optimistic": "analysis.optimistic",
+  "analysis.profit": "analysis.profit",
+  "analysis.timeline": "analysis.timeline",
+  "analysis.probability": "analysis.probability",
+  "analysis.trend.rising": "analysis.trend.rising",
+  "analysis.trend.stable": "analysis.trend.stable",
+  "analysis.trend.falling": "analysis.trend.falling",
+
+  // Detail extras
+  "detail.days": "detail.days",
 };
 
