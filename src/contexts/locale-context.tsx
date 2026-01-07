@@ -138,6 +138,26 @@ const translations: Record<LocaleCode, Record<string, string>> = {
     "detail.created": "Created",
     "detail.lastUpdated": "Last Updated",
     "detail.months": "months",
+    
+    // Filters
+    "filter.search.placeholder": "Search by name or address...",
+    "filter.clearSearch": "Clear search",
+    "filter.status": "Status",
+    "filter.status.all": "All Status",
+    "filter.type": "Type",
+    "filter.type.all": "All Types",
+    "filter.sort": "Sort by",
+    "filter.sort.newest": "Newest first",
+    "filter.sort.oldest": "Oldest first",
+    "filter.sort.priceHigh": "Price: High to Low",
+    "filter.sort.priceLow": "Price: Low to High",
+    "filter.sort.roiHigh": "ROI: High to Low",
+    "filter.sort.roiLow": "ROI: Low to High",
+    "filter.sort.nameAZ": "Name: A to Z",
+    "filter.sort.nameZA": "Name: Z to A",
+    "filter.clear": "Clear filters",
+    "filter.results": "{count} deals found",
+    "filter.noResults": "No deals match your filters",
   },
   
   "pt-BR": {
@@ -264,6 +284,26 @@ const translations: Record<LocaleCode, Record<string, string>> = {
     "detail.created": "Criado em",
     "detail.lastUpdated": "Última Atualização",
     "detail.months": "meses",
+    
+    // Filters
+    "filter.search.placeholder": "Buscar por nome ou endereço...",
+    "filter.clearSearch": "Limpar busca",
+    "filter.status": "Status",
+    "filter.status.all": "Todos os Status",
+    "filter.type": "Tipo",
+    "filter.type.all": "Todos os Tipos",
+    "filter.sort": "Ordenar por",
+    "filter.sort.newest": "Mais recentes",
+    "filter.sort.oldest": "Mais antigos",
+    "filter.sort.priceHigh": "Preço: Maior para Menor",
+    "filter.sort.priceLow": "Preço: Menor para Maior",
+    "filter.sort.roiHigh": "ROI: Maior para Menor",
+    "filter.sort.roiLow": "ROI: Menor para Maior",
+    "filter.sort.nameAZ": "Nome: A a Z",
+    "filter.sort.nameZA": "Nome: Z a A",
+    "filter.clear": "Limpar filtros",
+    "filter.results": "{count} negócios encontrados",
+    "filter.noResults": "Nenhum negócio corresponde aos filtros",
   },
 };
 

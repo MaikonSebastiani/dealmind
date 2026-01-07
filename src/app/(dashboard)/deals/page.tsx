@@ -1,30 +1,64 @@
-import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Plus, Eye, Pencil } from "lucide-react";
 import { DealsPageClient } from "./deals-client";
+import { Prisma } from "@prisma/client";
 
-export default async function DealsPage() {
+interface PageProps {
+  searchParams: Promise<{
+    search?: string;
+    status?: string;
+    type?: string;
+    sort?: string;
+  }>;
+}
+
+export default async function DealsPage({ searchParams }: PageProps) {
   const session = await auth();
   
   if (!session?.user?.id) {
     redirect("/login");
   }
 
+  // Await searchParams (Next.js 15+)
+  const params = await searchParams;
+  const { search, status, type: propertyType, sort = "createdAt-desc" } = params;
+
+  // Parse sort parameter
+  const [sortField, sortOrder] = sort.split("-") as [string, "asc" | "desc"];
+  
+  // Valid sort fields
+  const validSortFields = ["createdAt", "purchasePrice", "estimatedROI", "name"];
+  const orderByField = validSortFields.includes(sortField) ? sortField : "createdAt";
+
+  // Build where clause
+  const where: Prisma.DealWhereInput = {
+    userId: session.user.id,
+  };
+
+  // Add status filter
+  if (status && status !== "all") {
+    where.status = status as Prisma.DealWhereInput["status"];
+  }
+
+  // Add property type filter
+  if (propertyType && propertyType !== "all") {
+    where.propertyType = propertyType as Prisma.DealWhereInput["propertyType"];
+  }
+
+  // Add search filter (name or address)
+  if (search) {
+    where.OR = [
+      { name: { contains: search, mode: "insensitive" } },
+      { address: { contains: search, mode: "insensitive" } },
+    ];
+  }
+
   const deals = await prisma.deal.findMany({
-    where: { userId: session.user.id },
-    orderBy: { createdAt: "desc" },
+    where,
+    orderBy: {
+      [orderByField]: sortOrder || "desc",
+    },
   });
 
   // Serialize Decimal fields

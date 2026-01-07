@@ -92,7 +92,7 @@ export async function POST(request: Request) {
   }
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const session = await auth();
     
@@ -103,16 +103,59 @@ export async function GET() {
       );
     }
 
+    // Parse query params
+    const { searchParams } = new URL(request.url);
+    const search = searchParams.get("search") || "";
+    const status = searchParams.get("status");
+    const propertyType = searchParams.get("type");
+    const sort = searchParams.get("sort") || "createdAt-desc";
+
+    // Parse sort parameter
+    const [sortField, sortOrder] = sort.split("-") as [string, "asc" | "desc"];
+    
+    // Valid sort fields
+    const validSortFields = ["createdAt", "purchasePrice", "estimatedROI", "name"];
+    const orderByField = validSortFields.includes(sortField) ? sortField : "createdAt";
+
+    // Build where clause
+    const where: {
+      userId: string;
+      status?: string;
+      propertyType?: string;
+      OR?: Array<{ name?: { contains: string; mode: "insensitive" }; address?: { contains: string; mode: "insensitive" } }>;
+    } = {
+      userId: session.user.id,
+    };
+
+    // Add status filter
+    if (status && status !== "all") {
+      where.status = status;
+    }
+
+    // Add property type filter
+    if (propertyType && propertyType !== "all") {
+      where.propertyType = propertyType;
+    }
+
+    // Add search filter (name or address)
+    if (search) {
+      where.OR = [
+        { name: { contains: search, mode: "insensitive" } },
+        { address: { contains: search, mode: "insensitive" } },
+      ];
+    }
+
     const deals = await prisma.deal.findMany({
-      where: {
-        userId: session.user.id,
-      },
+      where,
       orderBy: {
-        createdAt: "desc", 
+        [orderByField]: sortOrder || "desc",
       },
     });
 
-    return NextResponse.json({ deals });
+    return NextResponse.json({ 
+      deals,
+      count: deals.length,
+    });
 
   } catch (error) {
     console.error("Error fetching deals:", error);
