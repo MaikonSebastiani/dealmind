@@ -3,6 +3,12 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createDealSchema } from "@/lib/validations/deal";
 import { calculateDealMetrics } from "@/lib/calculations/financing";
+import { 
+  checkRateLimit, 
+  getRateLimitHeaders,
+  RATE_LIMIT_CONFIG 
+} from "@/lib/rate-limit";
+import type { Prisma, DealStatus, PropertyType } from "@prisma/client";
 
 export async function POST(request: Request) {
   try {
@@ -12,6 +18,19 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { error: "UNAUTHORIZED", message: "You must be logged in" },
         { status: 401 }
+      );
+    }
+
+    // Rate limiting for mutations (per user)
+    const rateLimit = checkRateLimit(`deals:create:${session.user.id}`, RATE_LIMIT_CONFIG.mutation);
+    
+    if (!rateLimit.success) {
+      return NextResponse.json(
+        { error: "RATE_LIMITED", message: "Too many requests. Please slow down." },
+        { 
+          status: 429,
+          headers: getRateLimitHeaders(rateLimit),
+        }
       );
     }
 
@@ -126,20 +145,19 @@ export async function GET(request: Request) {
     const validSortFields = ["createdAt", "purchasePrice", "estimatedROI", "name"];
     const orderByField = validSortFields.includes(sortField) ? sortField : "createdAt";
 
-    // Build where clause
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const where: any = {
+    // Build where clause with Prisma type
+    const where: Prisma.DealWhereInput = {
       userId: session.user.id,
     };
 
     // Add status filter
     if (status && status !== "all") {
-      where.status = status;
+      where.status = status as DealStatus;
     }
 
     // Add property type filter
     if (propertyType && propertyType !== "all") {
-      where.propertyType = propertyType;
+      where.propertyType = propertyType as PropertyType;
     }
 
     // Add search filter (name or address)

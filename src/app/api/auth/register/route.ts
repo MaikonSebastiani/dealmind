@@ -2,6 +2,12 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { 
+  checkRateLimit, 
+  getClientIdentifier, 
+  getRateLimitHeaders,
+  RATE_LIMIT_CONFIG 
+} from "@/lib/rate-limit";
 
 // Server-side validation schema (without confirmPassword)
 const registerApiSchema = z.object({
@@ -12,6 +18,20 @@ const registerApiSchema = z.object({
 
 export async function POST(request: Request) {
   try {
+    // Rate limiting - stricter for registration
+    const clientId = getClientIdentifier(request);
+    const rateLimit = checkRateLimit(`register:${clientId}`, RATE_LIMIT_CONFIG.register);
+    
+    if (!rateLimit.success) {
+      return NextResponse.json(
+        { error: "RATE_LIMITED", message: "Too many registration attempts. Please try again later." },
+        { 
+          status: 429,
+          headers: getRateLimitHeaders(rateLimit),
+        }
+      );
+    }
+
     const body = await request.json();
 
     // Validate with Zod

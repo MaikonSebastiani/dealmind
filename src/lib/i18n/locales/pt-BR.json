@@ -1,0 +1,169 @@
+{
+  "nav": {
+    "dashboard": "Painel",
+    "deals": "Negócios",
+    "settings": "Configurações",
+    "logout": "Sair"
+  },
+  "common": {
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "delete": "Excluir",
+    "edit": "Editar",
+    "create": "Criar",
+    "back": "Voltar",
+    "loading": "Carregando...",
+    "saving": "Salvando...",
+    "creating": "Criando...",
+    "yes": "Sim",
+    "no": "Não",
+    "error": "Algo deu errado. Por favor, tente novamente."
+  },
+  "deal": {
+    "notFound": "Negócio não encontrado",
+    "title": {
+      "new": "Novo Negócio",
+      "edit": "Editar Negócio"
+    },
+    "subtitle": {
+      "new": "Criar um novo investimento imobiliário",
+      "edit": "Atualizar informações do negócio"
+    },
+    "section": {
+      "basicInfo": "Informações Básicas",
+      "financial": "Detalhes Financeiros",
+      "financing": "Financiamento",
+      "notes": "Observações",
+      "preview": "Prévia do Investimento",
+      "characteristics": "Características do Imóvel"
+    },
+    "name": "Nome do Negócio",
+    "namePlaceholder": "ex: Apartamento Centro",
+    "address": "Endereço",
+    "addressPlaceholder": "ex: Rua Principal, 123, Cidade, Estado",
+    "zipCode": "CEP",
+    "propertyType": {
+      "label": "Tipo de Imóvel",
+      "select": "Selecione o tipo de imóvel",
+      "residential": "Residencial",
+      "commercial": "Comercial",
+      "land": "Terreno",
+      "industrial": "Industrial",
+      "mixed": "Uso Misto"
+    },
+    "purchasePrice": "Preço de Compra",
+    "renovationCosts": "Custos de Reforma",
+    "renovationCostsDescription": "Custos únicos (reforma, reparos, cartório)",
+    "monthlyExpenses": "Despesas Mensais",
+    "monthlyExpensesDescription": "Condomínio, IPTU, seguro, manutenção",
+    "estimatedSalePrice": "Preço de Venda Estimado",
+    "timeline": "Prazo (meses)",
+    "timelineDescription": "Usado para calcular despesas mensais totais",
+    "financing": {
+      "enabled": "Incluir Financiamento",
+      "downPayment": "Entrada",
+      "downPaymentDescription": "Pagamento inicial (geralmente 20-30%)",
+      "loanAmount": "Valor Financiado",
+      "interestRate": "Taxa de Juros (a.a.)",
+      "interestRateDescription": "Taxa anual (ex: 10.5%)",
+      "loanTerm": "Prazo (anos)",
+      "monthlyPayment": "Parcela Mensal",
+      "closingCosts": "Custos de Fechamento",
+      "closingCostsDescription": "ITBI, escritura, registro (3-5%)"
+    },
+    "notes": "Observações Adicionais",
+    "notesPlaceholder": "Informações adicionais sobre este negócio...",
+    "action": {
+      "create": "Criar Negócio",
+      "save": "Salvar Alterações"
+    },
+    "area": "Área",
+    "areaPlaceholder": "ex: 120",
+    "areaUnit": "m²",
+    "bedrooms": "Quartos",
+    "bathrooms": "Banheiros",
+    "parkingSpaces": "Vagas",
+    "lotSize": "Terreno",
+    "lotSizeDescription": "Área do terreno (opcional para apartamentos)",
+    "yearBuilt": "Ano de Construção",
+    "condition": {
+      "label": "Estado",
+      "select": "Selecione o estado",
+      "new": "Novo/Na Planta",
+      "excellent": "Excelente",
+      "good": "Bom",
+      "fair": "Regular",
+      "needsWork": "Precisa de Reforma"
+    }
+  },
+  "preview": {
+    "purchasePrice": "Preço de Compra",
+    "renovationCosts": "+ Custos de Reforma",
+    "monthlyExpenses": "+ Despesas Mensais",
+    "financing": "- Financiamento",
+    "totalInvestment": "Capital Necessário",
+    "salePrice": "Preço de Venda",
+    "loanPayoff": "- Quitação do Financiamento",
+    "estimatedProfit": "Lucro Estimado",
+    "roi": "ROI sobre Capital",
+    "monthlyPayment": "Parcela Mensal"
+  },
+  "status": {
+    "analyzing": "Analisando",
+    "analysisComplete": "Análise Completa",
+    "approved": "Aprovado",
+    "rejected": "Rejeitado",
+    "purchased": "Comprado",
+    "renovating": "Em Reforma",
+    "forSale": "À Venda",
+    "sold": "Vendido"
+  },
+  "deals": {
+    "title": "Negócios",
+    "empty": "Nenhum negócio ainda. Crie seu primeiro negócio para começar!",
+    "newDeal": "Novo Negócio",
+    "table": {
+      "name": "Nome",
+      "type": "Tipo",
+      "investment": "Investimento",
+      "profit": "Lucro",
+      "roi": "ROI",
+      "status": "Status",
+      "actions": "Ações"
+    }
+  },
+  "detail": {
+    "totalInvestment": "Investimento Total",
+    "estimatedSalePrice": "Preço de Venda Estimado",
+    "estimatedProfit": "Lucro Estimado",
+    "estimatedROI": "ROI Estimado",
+    "financialBreakdown": "Detalhamento Financeiro",
+    "dealInfo": "Informações do Negócio",
+    "propertyType": "Tipo de Imóvel",
+    "timeline": "Prazo",
+    "created": "Criado em",
+    "lastUpdated": "Última Atualização",
+    "months": "meses"
+  },
+  "filter": {
+    "searchPlaceholder": "Buscar por nome ou endereço...",
+    "clearSearch": "Limpar busca",
+    "status": "Status",
+    "statusAll": "Todos os Status",
+    "type": "Tipo",
+    "typeAll": "Todos os Tipos",
+    "sort": "Ordenar por",
+    "sortNewest": "Mais recentes",
+    "sortOldest": "Mais antigos",
+    "sortPriceHigh": "Preço: Maior para Menor",
+    "sortPriceLow": "Preço: Menor para Maior",
+    "sortRoiHigh": "ROI: Maior para Menor",
+    "sortRoiLow": "ROI: Menor para Maior",
+    "sortNameAZ": "Nome: A a Z",
+    "sortNameZA": "Nome: Z a A",
+    "clear": "Limpar filtros",
+    "results": "{count} negócios encontrados",
+    "noResults": "Nenhum negócio corresponde aos filtros"
+  }
+}
+

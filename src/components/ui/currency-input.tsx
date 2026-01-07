@@ -63,7 +63,7 @@ const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputProps>(
         <div className="relative">
           <NumericFormat
             id={id}
-            getInputRef={(el) => {
+            getInputRef={(el: HTMLInputElement | null) => {
               // Handle both refs
               if (typeof ref === "function") ref(el);
               else if (ref) ref.current = el;

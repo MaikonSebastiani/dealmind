@@ -1,0 +1,169 @@
+{
+  "nav": {
+    "dashboard": "Dashboard",
+    "deals": "Deals",
+    "settings": "Settings",
+    "logout": "Logout"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "back": "Back",
+    "loading": "Loading...",
+    "saving": "Saving...",
+    "creating": "Creating...",
+    "yes": "Yes",
+    "no": "No",
+    "error": "Something went wrong. Please try again."
+  },
+  "deal": {
+    "notFound": "Deal not found",
+    "title": {
+      "new": "New Deal",
+      "edit": "Edit Deal"
+    },
+    "subtitle": {
+      "new": "Create a new real estate investment deal",
+      "edit": "Update deal information"
+    },
+    "section": {
+      "basicInfo": "Basic Information",
+      "financial": "Financial Details",
+      "financing": "Financing",
+      "notes": "Notes",
+      "preview": "Investment Preview",
+      "characteristics": "Property Characteristics"
+    },
+    "name": "Deal Name",
+    "namePlaceholder": "e.g., Downtown Apartment Complex",
+    "address": "Address",
+    "addressPlaceholder": "e.g., 123 Main St, City, State",
+    "zipCode": "ZIP Code",
+    "propertyType": {
+      "label": "Property Type",
+      "select": "Select property type",
+      "residential": "Residential",
+      "commercial": "Commercial",
+      "land": "Land",
+      "industrial": "Industrial",
+      "mixed": "Mixed Use"
+    },
+    "purchasePrice": "Purchase Price",
+    "renovationCosts": "Renovation/Repair Costs",
+    "renovationCostsDescription": "One-time costs (renovation, repairs, closing)",
+    "monthlyExpenses": "Monthly Expenses",
+    "monthlyExpensesDescription": "HOA, taxes, insurance, maintenance",
+    "estimatedSalePrice": "Estimated Sale Price",
+    "timeline": "Timeline (months)",
+    "timelineDescription": "Used to calculate total monthly expenses",
+    "financing": {
+      "enabled": "Include Financing",
+      "downPayment": "Down Payment",
+      "downPaymentDescription": "Initial payment (typically 20-25%)",
+      "loanAmount": "Loan Amount",
+      "interestRate": "Interest Rate (APR)",
+      "interestRateDescription": "Annual percentage rate",
+      "loanTerm": "Loan Term (years)",
+      "monthlyPayment": "Monthly Payment",
+      "closingCosts": "Closing Costs",
+      "closingCostsDescription": "Title, escrow, origination fees (2-5%)"
+    },
+    "notes": "Additional Notes",
+    "notesPlaceholder": "Any additional information about this deal...",
+    "action": {
+      "create": "Create Deal",
+      "save": "Save Changes"
+    },
+    "area": "Area",
+    "areaPlaceholder": "e.g., 120",
+    "areaUnit": "sqft",
+    "bedrooms": "Bedrooms",
+    "bathrooms": "Bathrooms",
+    "parkingSpaces": "Parking Spaces",
+    "lotSize": "Lot Size",
+    "lotSizeDescription": "Land area (optional for apartments)",
+    "yearBuilt": "Year Built",
+    "condition": {
+      "label": "Condition",
+      "select": "Select condition",
+      "new": "New/Under Construction",
+      "excellent": "Excellent",
+      "good": "Good",
+      "fair": "Fair",
+      "needsWork": "Needs Work"
+    }
+  },
+  "preview": {
+    "purchasePrice": "Purchase Price",
+    "renovationCosts": "+ Renovation Costs",
+    "monthlyExpenses": "+ Monthly Expenses",
+    "financing": "- Financing (Loan)",
+    "totalInvestment": "Total Cash Needed",
+    "salePrice": "Sale Price",
+    "loanPayoff": "- Loan Payoff",
+    "estimatedProfit": "Estimated Profit",
+    "roi": "Cash-on-Cash ROI",
+    "monthlyPayment": "Monthly Payment"
+  },
+  "status": {
+    "analyzing": "Analyzing",
+    "analysisComplete": "Analysis Complete",
+    "approved": "Approved",
+    "rejected": "Rejected",
+    "purchased": "Purchased",
+    "renovating": "Renovating",
+    "forSale": "For Sale",
+    "sold": "Sold"
+  },
+  "deals": {
+    "title": "Deals",
+    "empty": "No deals yet. Create your first deal to get started!",
+    "newDeal": "New Deal",
+    "table": {
+      "name": "Name",
+      "type": "Type",
+      "investment": "Investment",
+      "profit": "Profit",
+      "roi": "ROI",
+      "status": "Status",
+      "actions": "Actions"
+    }
+  },
+  "detail": {
+    "totalInvestment": "Total Investment",
+    "estimatedSalePrice": "Estimated Sale Price",
+    "estimatedProfit": "Estimated Profit",
+    "estimatedROI": "Estimated ROI",
+    "financialBreakdown": "Financial Breakdown",
+    "dealInfo": "Deal Information",
+    "propertyType": "Property Type",
+    "timeline": "Timeline",
+    "created": "Created",
+    "lastUpdated": "Last Updated",
+    "months": "months"
+  },
+  "filter": {
+    "searchPlaceholder": "Search by name or address...",
+    "clearSearch": "Clear search",
+    "status": "Status",
+    "statusAll": "All Status",
+    "type": "Type",
+    "typeAll": "All Types",
+    "sort": "Sort by",
+    "sortNewest": "Newest first",
+    "sortOldest": "Oldest first",
+    "sortPriceHigh": "Price: High to Low",
+    "sortPriceLow": "Price: Low to High",
+    "sortRoiHigh": "ROI: High to Low",
+    "sortRoiLow": "ROI: Low to High",
+    "sortNameAZ": "Name: A to Z",
+    "sortNameZA": "Name: Z to A",
+    "clear": "Clear filters",
+    "results": "{count} deals found",
+    "noResults": "No deals match your filters"
+  }
+}
+
