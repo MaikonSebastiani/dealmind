@@ -41,6 +41,8 @@
     "namePlaceholder": "e.g., Downtown Apartment Complex",
     "address": "Address",
     "addressPlaceholder": "e.g., 123 Main St, City, State",
+    "addressWaitingCep": "Enter ZIP code first",
+    "addressCepHint": "Enter ZIP code to auto-fill address",
     "zipCode": "ZIP Code",
     "propertyType": {
       "label": "Property Type",

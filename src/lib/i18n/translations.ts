@@ -103,6 +103,8 @@ export const keyMapping: Record<string, string> = {
   "deal.name.placeholder": "deal.namePlaceholder",
   "deal.address": "deal.address",
   "deal.address.placeholder": "deal.addressPlaceholder",
+  "deal.address.waitingCep": "deal.addressWaitingCep",
+  "deal.address.cepHint": "deal.addressCepHint",
   "deal.zipCode": "deal.zipCode",
   "deal.propertyType": "deal.propertyType.label",
   "deal.propertyType.select": "deal.propertyType.select",

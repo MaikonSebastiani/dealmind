@@ -13,6 +13,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PROPERTY_TYPE_VALUES, PROPERTY_TYPE_KEYS } from "../constants";
 import type { FormSectionProps, PropertyType } from "../types";
+import type { AddressData } from "@/lib/services/viacep";
 
 export function BasicInfoSection({ 
   register, 
@@ -26,6 +27,19 @@ export function BasicInfoSection({
     value,
     label: t(PROPERTY_TYPE_KEYS[value]),
   }));
+
+  // Track if address was filled by CEP lookup (for pt-BR)
+  const isBrazilian = locale === "pt-BR";
+  const currentAddress = watch("address");
+  const currentZipCode = watch("zipCode");
+  
+  // Address is locked until CEP lookup fills it (only for pt-BR)
+  const isAddressLocked = isBrazilian && (!currentAddress || currentAddress.trim() === "");
+
+  // Handle address auto-fill from CEP lookup
+  const handleAddressFound = (address: AddressData) => {
+    setValue("address", address.fullAddress, { shouldValidate: true });
+  };
 
   return (
     <Card>
@@ -42,22 +56,25 @@ export function BasicInfoSection({
         />
 
         <div className="grid gap-4 sm:grid-cols-3">
-          <div className="sm:col-span-2">
-            <Input
-              id="address"
-              label={t("deal.address")}
-              placeholder={t("deal.address.placeholder")}
-              error={errors.address?.message}
-              {...register("address")}
-            />
-          </div>
           <ZipCodeInput
             id="zipCode"
             locale={locale}
             value={watch("zipCode") || ""}
             onChange={(value) => setValue("zipCode", value)}
+            onAddressFound={handleAddressFound}
             error={errors.zipCode?.message}
           />
+          <div className="sm:col-span-2">
+            <Input
+              id="address"
+              label={t("deal.address")}
+              placeholder={isAddressLocked ? t("deal.address.waitingCep") : t("deal.address.placeholder")}
+              error={errors.address?.message}
+              disabled={isAddressLocked}
+              description={isAddressLocked ? t("deal.address.cepHint") : undefined}
+              {...register("address")}
+            />
+          </div>
         </div>
 
         <div className="space-y-1.5">

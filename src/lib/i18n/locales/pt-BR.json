@@ -41,6 +41,8 @@
     "namePlaceholder": "ex: Apartamento Centro",
     "address": "Endereço",
     "addressPlaceholder": "ex: Rua Principal, 123, Cidade, Estado",
+    "addressWaitingCep": "Preencha o CEP primeiro",
+    "addressCepHint": "",
     "zipCode": "CEP",
     "propertyType": {
       "label": "Tipo de Imóvel",
