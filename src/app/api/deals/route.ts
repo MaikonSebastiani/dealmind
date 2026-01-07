@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createDealSchema } from "@/lib/validations/deal";
+import { calculateDealMetrics } from "@/lib/calculations/financing";
 
 export async function POST(request: Request) {
   try {
@@ -32,14 +33,19 @@ export async function POST(request: Request) {
 
     const data = result.data;
 
-    // Calculate total monthly expenses over the investment period
-    const totalMonthlyExpenses = (data.monthlyExpenses || 0) * (data.estimatedTimeMonths || 12);
-    
-    // Total investment = purchase + renovation costs + monthly expenses over time
-    const totalInvestment = data.purchasePrice + (data.estimatedCosts || 0) + totalMonthlyExpenses;
-    
-    const estimatedProfit = data.estimatedSalePrice - totalInvestment;
-    const estimatedROI = (estimatedProfit / totalInvestment) * 100;
+    // Use centralized calculation utility
+    const metrics = calculateDealMetrics({
+      purchasePrice: data.purchasePrice,
+      estimatedCosts: data.estimatedCosts || 0,
+      monthlyExpenses: data.monthlyExpenses || 0,
+      estimatedSalePrice: data.estimatedSalePrice,
+      estimatedTimeMonths: data.estimatedTimeMonths || 12,
+      useFinancing: data.useFinancing,
+      downPayment: data.downPayment,
+      interestRate: data.interestRate,
+      loanTermYears: data.loanTermYears,
+      closingCosts: data.closingCosts,
+    });
 
     const deal = await prisma.deal.create({
       data: {
@@ -53,9 +59,18 @@ export async function POST(request: Request) {
         monthlyExpenses: data.monthlyExpenses || 0,
         estimatedSalePrice: data.estimatedSalePrice,
         estimatedTimeMonths: data.estimatedTimeMonths || 12,
+        // Financing fields
+        useFinancing: data.useFinancing ?? false,
+        downPayment: data.useFinancing ? data.downPayment : null,
+        loanAmount: data.useFinancing ? metrics.loanAmount : null,
+        interestRate: data.useFinancing ? data.interestRate : null,
+        loanTermYears: data.useFinancing ? data.loanTermYears : null,
+        monthlyPayment: data.useFinancing ? metrics.monthlyPayment : null,
+        closingCosts: data.useFinancing ? data.closingCosts : null,
+        // Calculated fields
         notes: data.notes,
-        estimatedProfit,
-        estimatedROI,
+        estimatedProfit: metrics.estimatedProfit,
+        estimatedROI: metrics.estimatedROI,
         status: "ANALYZING",
       },
     });
@@ -107,4 +122,3 @@ export async function GET() {
     );
   }
 }
-
