@@ -1,6 +1,5 @@
 "use client";
 
-import { UseFormRegister, UseFormWatch, UseFormSetValue, FieldErrors } from "react-hook-form";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -11,47 +10,25 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Home } from "lucide-react";
-import { useLocale, type LocaleCode } from "@/contexts/locale-context";
+import { INPUT_CLASS, PROPERTY_CONDITION_VALUES, PROPERTY_CONDITION_KEYS } from "../constants";
+import type { FormSectionProps, PropertyCondition } from "../types";
 
-type ConditionType = "NEW" | "EXCELLENT" | "GOOD" | "FAIR" | "NEEDS_WORK" | null;
-
-interface FormValues {
-  area?: number | null;
-  bedrooms?: number | null;
-  bathrooms?: number | null;
-  parkingSpaces?: number | null;
-  lotSize?: number | null;
-  yearBuilt?: number | null;
-  condition?: ConditionType;
-  [key: string]: unknown;
+interface CharacteristicsSectionProps extends FormSectionProps {
+  areaUnit: string;
 }
 
-interface DealFormCharacteristicsProps {
-  register: UseFormRegister<FormValues>;
-  watch: UseFormWatch<FormValues>;
-  setValue: UseFormSetValue<FormValues>;
-  errors: FieldErrors<FormValues>;
-  locale: LocaleCode;
-}
-
-export function DealFormCharacteristics({ 
+export function CharacteristicsSection({ 
   register, 
   watch,
   setValue, 
-  errors,
-  locale,
-}: DealFormCharacteristicsProps) {
-  const { t } = useLocale();
-
-  const PROPERTY_CONDITIONS = [
-    { value: "NEW", label: t("deal.condition.new") },
-    { value: "EXCELLENT", label: t("deal.condition.excellent") },
-    { value: "GOOD", label: t("deal.condition.good") },
-    { value: "FAIR", label: t("deal.condition.fair") },
-    { value: "NEEDS_WORK", label: t("deal.condition.needsWork") },
-  ];
-
-  const areaUnit = locale === "pt-BR" ? "m²" : "sqft";
+  errors, 
+  t,
+  areaUnit,
+}: CharacteristicsSectionProps) {
+  const propertyConditions = PROPERTY_CONDITION_VALUES.map((value) => ({
+    value,
+    label: t(PROPERTY_CONDITION_KEYS[value]),
+  }));
 
   return (
     <Card>
@@ -70,7 +47,7 @@ export function DealFormCharacteristics({
               type="number"
               step="0.01"
               min="0"
-              className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+              className={INPUT_CLASS}
               placeholder={t("deal.area.placeholder")}
               {...register("area", { valueAsNumber: true })}
             />
@@ -86,7 +63,7 @@ export function DealFormCharacteristics({
               type="number"
               min="0"
               max="50"
-              className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+              className={INPUT_CLASS}
               placeholder="3"
               {...register("bedrooms", { valueAsNumber: true })}
             />
@@ -102,7 +79,7 @@ export function DealFormCharacteristics({
               type="number"
               min="0"
               max="50"
-              className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+              className={INPUT_CLASS}
               placeholder="2"
               {...register("bathrooms", { valueAsNumber: true })}
             />
@@ -118,7 +95,7 @@ export function DealFormCharacteristics({
               type="number"
               min="0"
               max="100"
-              className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+              className={INPUT_CLASS}
               placeholder="2"
               {...register("parkingSpaces", { valueAsNumber: true })}
             />
@@ -136,7 +113,7 @@ export function DealFormCharacteristics({
               type="number"
               step="0.01"
               min="0"
-              className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+              className={INPUT_CLASS}
               placeholder="250"
               {...register("lotSize", { valueAsNumber: true })}
             />
@@ -153,7 +130,7 @@ export function DealFormCharacteristics({
               type="number"
               min="1800"
               max={new Date().getFullYear() + 5}
-              className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+              className={INPUT_CLASS}
               placeholder="2010"
               {...register("yearBuilt", { valueAsNumber: true })}
             />
@@ -166,13 +143,13 @@ export function DealFormCharacteristics({
             <Label htmlFor="condition">{t("deal.condition")}</Label>
             <Select
               value={watch("condition") || ""}
-              onValueChange={(value) => setValue("condition", value as ConditionType)}
+              onValueChange={(value) => setValue("condition", value as PropertyCondition)}
             >
               <SelectTrigger id="condition">
                 <SelectValue placeholder={t("deal.condition.select")} />
               </SelectTrigger>
               <SelectContent>
-                {PROPERTY_CONDITIONS.map((cond) => (
+                {propertyConditions.map((cond) => (
                   <SelectItem key={cond.value} value={cond.value}>
                     {cond.label}
                   </SelectItem>
