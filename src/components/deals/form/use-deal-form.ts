@@ -13,6 +13,7 @@ import {
 } from "@/lib/calculations/financing";
 import { getDefaultFormValues } from "./constants";
 import type { DealFormMode, DealFormValues, DealMetrics, DealResponse, UploadedFile } from "./types";
+import type { SavedDocument } from "./sections/documents-section";
 
 interface UseDealFormOptions {
   mode: DealFormMode;
@@ -38,6 +39,10 @@ interface UseDealFormReturn {
   isDownPaymentValid: boolean;
   loanTermOptions: number[];
   
+  // Documents
+  existingDocuments: SavedDocument[];
+  deleteExistingDocument: (documentId: string) => Promise<void>;
+  
   // Actions
   onSubmit: (data: DealFormValues) => Promise<void>;
   formatCurrencyValue: (value: number) => string;
@@ -49,6 +54,7 @@ export function useDealForm({ mode, dealId, documents = [] }: UseDealFormOptions
   const [isLoading, setIsLoading] = useState(mode === "edit");
   const [generalError, setGeneralError] = useState<string | null>(null);
   const [resolvedDealId, setResolvedDealId] = useState<string | null>(null);
+  const [existingDocuments, setExistingDocuments] = useState<SavedDocument[]>([]);
 
   // Locale-specific defaults
   const defaultInterestRate = getDefaultInterestRate(locale);
@@ -143,6 +149,19 @@ export function useDealForm({ mode, dealId, documents = [] }: UseDealFormOptions
           notes: deal.notes || "",
         });
 
+        // Load existing documents
+        if (deal.documents && deal.documents.length > 0) {
+          const savedDocs: SavedDocument[] = deal.documents.map((doc) => ({
+            id: doc.id,
+            name: doc.name,
+            url: doc.url,
+            type: doc.type as SavedDocument["type"],
+            size: doc.size,
+            fileKey: doc.fileKey,
+          }));
+          setExistingDocuments(savedDocs);
+        }
+
         setIsLoading(false);
       } catch {
         setGeneralError(t("common.error"));
@@ -193,6 +212,22 @@ export function useDealForm({ mode, dealId, documents = [] }: UseDealFormOptions
     }
   };
 
+  // Delete existing document
+  const deleteExistingDocument = async (documentId: string) => {
+    if (!resolvedDealId) return;
+    
+    const response = await fetch(`/api/deals/${resolvedDealId}/documents/${documentId}`, {
+      method: "DELETE",
+    });
+    
+    if (!response.ok) {
+      throw new Error("Failed to delete document");
+    }
+    
+    // Remove from local state
+    setExistingDocuments(prev => prev.filter(doc => doc.id !== documentId));
+  };
+
   // Format currency helper
   const { formatCurrency } = require("@/lib/i18n/currency");
   const formatCurrencyValue = (value: number) => formatCurrency(value, locale);
@@ -208,6 +243,8 @@ export function useDealForm({ mode, dealId, documents = [] }: UseDealFormOptions
     minDownPayment,
     isDownPaymentValid,
     loanTermOptions,
+    existingDocuments,
+    deleteExistingDocument,
     onSubmit,
     formatCurrencyValue,
   };

@@ -15,14 +15,28 @@ import {
   Image as ImageIcon,
   AlertCircle,
   Upload,
-  CheckCircle2
+  CheckCircle2,
+  ExternalLink,
+  Database
 } from "lucide-react";
 import type { UploadedFile } from "../types";
 import type { LocaleCode } from "@/contexts/locale-context";
 
+// Document saved in database
+export interface SavedDocument {
+  id: string;
+  name: string;
+  url: string;
+  type: UploadedFile["type"];
+  size: number;
+  fileKey: string;
+}
+
 interface DocumentsSectionProps {
   documents: UploadedFile[];
   onDocumentsChange: (documents: UploadedFile[]) => void;
+  existingDocuments?: SavedDocument[];
+  onDeleteExistingDocument?: (documentId: string) => Promise<void>;
   isAuction?: boolean;
   locale: LocaleCode;
   t: (key: string) => string;
@@ -31,11 +45,15 @@ interface DocumentsSectionProps {
 export function DocumentsSection({ 
   documents, 
   onDocumentsChange,
+  existingDocuments = [],
+  onDeleteExistingDocument,
   isAuction = false,
   locale,
   t,
 }: DocumentsSectionProps) {
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
+  const [isDeletingExisting, setIsDeletingExisting] = useState<string | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
 
@@ -128,6 +146,21 @@ export function DocumentsSection({
     }
   };
 
+  const handleDeleteExistingDocument = async (documentId: string) => {
+    if (!onDeleteExistingDocument) return;
+    
+    setIsDeletingExisting(documentId);
+    try {
+      await onDeleteExistingDocument(documentId);
+      setConfirmDeleteId(null);
+    } catch (error) {
+      console.error("Error deleting document:", error);
+      alert(locale === "pt-BR" ? "Erro ao excluir documento" : "Error deleting document");
+    } finally {
+      setIsDeletingExisting(null);
+    }
+  };
+
   const detectDocumentType = (fileName: string): UploadedFile["type"] => {
     const lowerName = fileName.toLowerCase();
     
@@ -164,6 +197,91 @@ export function DocumentsSection({
             {isAuction && <li>{t("documents.auctionNotice")}</li>}
           </ul>
         </div>
+
+        {/* Existing Documents from Database */}
+        {existingDocuments.length > 0 && (
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Database className="h-4 w-4 text-blue-500" />
+              <p className="text-sm font-medium">
+                {locale === "pt-BR" ? "Documentos Salvos" : "Saved Documents"} ({existingDocuments.length})
+              </p>
+            </div>
+            <div className="space-y-2">
+              {existingDocuments.map((doc) => (
+                <div
+                  key={doc.id}
+                  className="flex items-center gap-3 p-3 rounded-lg border bg-blue-50/50 border-blue-200 transition-colors"
+                >
+                  {getFileIcon(doc.name.endsWith(".pdf") ? "application/pdf" : "image/*")}
+                  
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">{doc.name}</p>
+                    <p className="text-xs text-muted-foreground">{formatFileSize(doc.size)}</p>
+                  </div>
+                  
+                  <Badge className={getDocumentTypeBadgeColor(doc.type)}>
+                    {getDocumentTypeLabel(doc.type)}
+                  </Badge>
+                  
+                  <div className="flex items-center gap-1">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      asChild
+                    >
+                      <a href={doc.url} target="_blank" rel="noopener noreferrer" title={locale === "pt-BR" ? "Abrir documento" : "Open document"}>
+                        <ExternalLink className="h-4 w-4" />
+                      </a>
+                    </Button>
+                    
+                    {onDeleteExistingDocument && (
+                      confirmDeleteId === doc.id ? (
+                        <div className="flex items-center gap-1">
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => handleDeleteExistingDocument(doc.id)}
+                            disabled={isDeletingExisting === doc.id}
+                            className="text-xs h-7 px-2"
+                          >
+                            {isDeletingExisting === doc.id ? (
+                              <Loader2 className="h-3 w-3 animate-spin" />
+                            ) : (
+                              locale === "pt-BR" ? "Confirmar" : "Confirm"
+                            )}
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setConfirmDeleteId(null)}
+                            className="text-xs h-7 px-2"
+                          >
+                            {locale === "pt-BR" ? "Não" : "No"}
+                          </Button>
+                        </div>
+                      ) : (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setConfirmDeleteId(doc.id)}
+                          className="text-destructive hover:text-destructive"
+                          title={locale === "pt-BR" ? "Excluir documento" : "Delete document"}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Custom Upload Dropzone */}
         <div

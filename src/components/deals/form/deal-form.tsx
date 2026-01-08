@@ -32,6 +32,8 @@ export function DealForm({ mode, dealId }: DealFormProps) {
     minDownPayment,
     isDownPaymentValid,
     loanTermOptions,
+    existingDocuments,
+    deleteExistingDocument,
     onSubmit,
   } = useDealForm({ mode, dealId, documents });
 
@@ -126,6 +128,8 @@ export function DealForm({ mode, dealId }: DealFormProps) {
           <DocumentsSection 
             documents={documents}
             onDocumentsChange={setDocuments}
+            existingDocuments={existingDocuments}
+            onDeleteExistingDocument={deleteExistingDocument}
             isAuction={isAuction}
             locale={locale}
             t={t}
