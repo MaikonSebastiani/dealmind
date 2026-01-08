@@ -261,7 +261,28 @@ ${deal.hasPropertyRegistry ? `
 - Cláusulas Restritivas (Restrictive Clauses) - inalienability, incommunicability
 - Ações Judiciais (Lawsuits) - pending litigation
 
-List ALL encumbrances found, even if they seem resolved.
+List ALL encumbrances found in the "encumbrances" array.
+
+${isAuction ? `
+**IMPORTANT - THIS IS AN AUCTION PROPERTY:**
+The user ALREADY KNOWS this is an auction property. Therefore:
+- Alienação Fiduciária (Fiduciary Alienation) is EXPECTED - do NOT put in alerts
+- Consolidação da propriedade (Property Consolidation) is EXPECTED - do NOT put in alerts
+- These should be listed in "encumbrances" as informational only, NOT as critical alerts
+- Only put in "alerts" things that are UNEXPECTED even for an auction:
+  - Nua Propriedade (Bare Ownership) - ALERT
+  - Usufruto (Usufruct) - ALERT
+  - Multiple different liens from various creditors - ALERT
+  - Pending lawsuits that could cancel the auction - ALERT
+  - Other restrictions that could prevent transfer after auction - ALERT
+` : `
+**IMPORTANT - THIS IS A TRADITIONAL MARKET PURCHASE:**
+The user selected TRADITIONAL market, so:
+- Alienação Fiduciária is a CRITICAL ALERT - property may be at risk
+- Consolidação is a CRITICAL ALERT - this suggests foreclosure
+- Any liens, mortgages, or encumbrances are CRITICAL ALERTS
+- Put ALL impediments in the "alerts" array as well as "encumbrances"
+`}
 ` : ""}
 ${deal.hasAuctionNotice ? `
 **AUCTION NOTICE (EDITAL) - EXTRACT:**
@@ -445,7 +466,7 @@ export async function analyzeDeal(
   }
 
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
     
     // Check if we have documents to analyze
     const hasDocuments = !!(deal.documents && deal.documents.length > 0);
