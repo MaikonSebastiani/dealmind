@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calculator, AlertTriangle, TrendingDown, ArrowDownRight } from "lucide-react";
-import { INPUT_CLASS, AMORTIZATION_TYPE_VALUES, AMORTIZATION_TYPE_KEYS } from "../constants";
+import { INPUT_CLASS } from "../constants";
 import type { FinancingSectionProps } from "../types";
 import { formatCurrency } from "@/lib/i18n/currency";
 
@@ -119,32 +119,6 @@ export function FinancingSection({
               </Select>
             </div>
 
-            {/* Amortization Type Selection */}
-            <div className="space-y-1.5">
-              <Label htmlFor="amortizationType">{t("deal.financing.amortization.label")}</Label>
-              <Select
-                value={amortizationType}
-                onValueChange={(value) => setValue("amortizationType", value as "SAC" | "PRICE")}
-              >
-                <SelectTrigger id="amortizationType">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {AMORTIZATION_TYPE_VALUES.map((type) => (
-                    <SelectItem key={type} value={type}>
-                      {t(AMORTIZATION_TYPE_KEYS[type])}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <p className="text-xs text-muted-foreground">
-                {amortizationType === "SAC" 
-                  ? (locale === "pt-BR" ? "Parcelas decrescentes, menos juros" : "Decreasing payments, less interest")
-                  : (locale === "pt-BR" ? "Parcelas fixas" : "Fixed payments")
-                }
-              </p>
-            </div>
-
             <CurrencyInput
               id="closingCosts"
               label={t("deal.financing.closingCosts")}
@@ -167,25 +141,36 @@ export function FinancingSection({
               </div>
             </div>
 
-            {/* SAC vs PRICE Comparison */}
+            {/* SAC vs PRICE Comparison - Clickable Cards */}
             {metrics.loanAmount > 0 && (
               <div className="sm:col-span-2 p-4 rounded-lg bg-muted/30 border space-y-3">
                 <h4 className="font-medium flex items-center gap-2 text-sm">
                   <TrendingDown className="h-4 w-4 text-primary" />
-                  {locale === "pt-BR" ? "Comparação SAC vs PRICE" : "SAC vs PRICE Comparison"}
+                  {locale === "pt-BR" ? "Escolha o Sistema de Amortização" : "Choose Amortization System"}
                 </h4>
                 
                 <div className="grid gap-4 sm:grid-cols-2">
-                  {/* SAC Info */}
-                  <div className={`p-3 rounded-lg border-2 ${amortizationType === "SAC" ? "border-primary bg-primary/5" : "border-muted"}`}>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="font-medium text-sm">SAC</span>
+                  {/* SAC Card - Clickable */}
+                  <button
+                    type="button"
+                    onClick={() => setValue("amortizationType", "SAC")}
+                    className={`p-3 rounded-lg border-2 text-left transition-all hover:shadow-md ${
+                      amortizationType === "SAC" 
+                        ? "border-primary bg-primary/5 ring-2 ring-primary/20" 
+                        : "border-muted hover:border-primary/50"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="font-semibold text-sm">SAC</span>
                       {amortizationType === "SAC" && (
                         <span className="text-xs bg-primary text-primary-foreground px-2 py-0.5 rounded">
-                          {locale === "pt-BR" ? "Selecionado" : "Selected"}
+                          ✓
                         </span>
                       )}
                     </div>
+                    <p className="text-xs text-blue-600 font-medium mb-2">
+                      {locale === "pt-BR" ? "💰 Melhor para moradia" : "💰 Best for living"}
+                    </p>
                     <div className="space-y-1 text-sm">
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">{locale === "pt-BR" ? "1ª Parcela" : "First Payment"}</span>
@@ -200,25 +185,42 @@ export function FinancingSection({
                       </div>
                       <div className="flex justify-between pt-1 border-t">
                         <span className="text-muted-foreground">{locale === "pt-BR" ? "Total Juros" : "Total Interest"}</span>
-                        <span>{fmt(metrics.totalInterestSAC)}</span>
+                        <span className="text-green-600 font-medium">{fmt(metrics.totalInterestSAC)}</span>
                       </div>
                     </div>
-                  </div>
+                    <p className="text-xs text-muted-foreground mt-2 italic">
+                      {locale === "pt-BR" 
+                        ? "Parcelas decrescentes, paga menos juros no total" 
+                        : "Decreasing payments, less total interest"
+                      }
+                    </p>
+                  </button>
 
-                  {/* PRICE Info */}
-                  <div className={`p-3 rounded-lg border-2 ${amortizationType === "PRICE" ? "border-primary bg-primary/5" : "border-muted"}`}>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="font-medium text-sm">PRICE</span>
+                  {/* PRICE Card - Clickable */}
+                  <button
+                    type="button"
+                    onClick={() => setValue("amortizationType", "PRICE")}
+                    className={`p-3 rounded-lg border-2 text-left transition-all hover:shadow-md ${
+                      amortizationType === "PRICE" 
+                        ? "border-primary bg-primary/5 ring-2 ring-primary/20" 
+                        : "border-muted hover:border-primary/50"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="font-semibold text-sm">PRICE</span>
                       {amortizationType === "PRICE" && (
                         <span className="text-xs bg-primary text-primary-foreground px-2 py-0.5 rounded">
-                          {locale === "pt-BR" ? "Selecionado" : "Selected"}
+                          ✓
                         </span>
                       )}
                     </div>
+                    <p className="text-xs text-amber-600 font-medium mb-2">
+                      {locale === "pt-BR" ? "📈 Melhor para investimento" : "📈 Best for investment"}
+                    </p>
                     <div className="space-y-1 text-sm">
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">{locale === "pt-BR" ? "Parcela Fixa" : "Fixed Payment"}</span>
-                        <span className="font-medium">{fmt(metrics.monthlyPaymentPRICE)}</span>
+                        <span className="font-medium text-amber-600">{fmt(metrics.monthlyPaymentPRICE)}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">{locale === "pt-BR" ? "Todas iguais" : "All same"}</span>
@@ -229,17 +231,34 @@ export function FinancingSection({
                         <span>{fmt(metrics.totalInterestPRICE)}</span>
                       </div>
                     </div>
-                  </div>
+                    <p className="text-xs text-muted-foreground mt-2 italic">
+                      {locale === "pt-BR" 
+                        ? "Parcela menor e fixa, ideal para flip rápido" 
+                        : "Lower fixed payment, ideal for quick flip"
+                      }
+                    </p>
+                  </button>
                 </div>
 
-                {/* Interest Savings */}
-                {metrics.interestSavings > 0 && (
+                {/* Comparison Info */}
+                {amortizationType === "SAC" && metrics.interestSavings > 0 && (
                   <div className="flex items-center justify-center gap-2 p-2 rounded-lg bg-green-50 border border-green-200 text-green-700 text-sm">
                     <TrendingDown className="h-4 w-4" />
                     <span>
                       {locale === "pt-BR" 
-                        ? `SAC economiza ${fmt(metrics.interestSavings)} em juros no total`
-                        : `SAC saves ${fmt(metrics.interestSavings)} in total interest`
+                        ? `Economia de ${fmt(metrics.interestSavings)} em juros no total`
+                        : `Saves ${fmt(metrics.interestSavings)} in total interest`
+                      }
+                    </span>
+                  </div>
+                )}
+                {amortizationType === "PRICE" && (
+                  <div className="flex items-center justify-center gap-2 p-2 rounded-lg bg-amber-50 border border-amber-200 text-amber-700 text-sm">
+                    <Calculator className="h-4 w-4" />
+                    <span>
+                      {locale === "pt-BR" 
+                        ? `Parcela ${fmt(metrics.firstPaymentSAC - metrics.monthlyPaymentPRICE)} menor que SAC inicial`
+                        : `Payment ${fmt(metrics.firstPaymentSAC - metrics.monthlyPaymentPRICE)} lower than initial SAC`
                       }
                     </span>
                   </div>
