@@ -72,6 +72,7 @@ export function useDealForm({ mode, dealId, documents = [] }: UseDealFormOptions
     propertyDebts: watch("propertyDebts") || 0,
     estimatedSalePrice: watch("estimatedSalePrice") || 0,
     estimatedTimeMonths: watch("estimatedTimeMonths") || 12,
+    acquisitionType: watch("acquisitionType") || "TRADITIONAL",
     useFinancing: watch("useFinancing") || false,
     downPayment: watch("downPayment") || 0,
     interestRate: watch("interestRate") || defaultInterestRate,

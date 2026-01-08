@@ -11,6 +11,9 @@ export interface FinancingInput {
   estimatedSalePrice: number;
   estimatedTimeMonths: number; // Holding period
   
+  // Acquisition type
+  acquisitionType?: "TRADITIONAL" | "AUCTION" | "AUCTION_NO_FEE";
+  
   // Financing (optional)
   useFinancing?: boolean;
   downPayment?: number;
@@ -27,6 +30,9 @@ export interface FinancingResult {
   // Loan details
   loanAmount: number;
   monthlyPayment: number;
+  
+  // Auction fees
+  auctioneerFee: number; // Comissão do leiloeiro (5% for AUCTION, 0 for others)
   
   // Investment summary
   totalCashInvested: number; // What you need upfront
@@ -117,6 +123,7 @@ export function calculateDealMetrics(input: FinancingInput): FinancingResult {
     propertyDebts = 0,
     estimatedSalePrice,
     estimatedTimeMonths,
+    acquisitionType = "TRADITIONAL",
     useFinancing = false,
     downPayment = 0,
     interestRate = 0,
@@ -125,6 +132,11 @@ export function calculateDealMetrics(input: FinancingInput): FinancingResult {
     isFirstProperty = false,
     locale = "en-US",
   } = input;
+
+  // Calculate auctioneer fee (5% for AUCTION with auctioneer, 0 for others)
+  const auctioneerFee = acquisitionType === "AUCTION" 
+    ? purchasePrice * 0.05 
+    : 0;
 
   // Calculate loan amount (purchase price - down payment)
   const loanAmount = useFinancing 
@@ -142,10 +154,10 @@ export function calculateDealMetrics(input: FinancingInput): FinancingResult {
   const totalHoldingCosts = totalMonthlyExpenses + totalMortgagePayments;
 
   // Cash invested upfront (what you need to start)
-  // Include property debts as part of acquisition costs
+  // Include property debts and auctioneer fee as part of acquisition costs
   const totalCashInvested = useFinancing
-    ? downPayment + estimatedCosts + closingCosts + propertyDebts
-    : purchasePrice + estimatedCosts + propertyDebts;
+    ? downPayment + estimatedCosts + closingCosts + propertyDebts + auctioneerFee
+    : purchasePrice + estimatedCosts + propertyDebts + auctioneerFee;
 
   // Total cost at sale (including loan payoff)
   // For flipping: you pay off the full remaining loan balance when you sell
@@ -172,6 +184,7 @@ export function calculateDealMetrics(input: FinancingInput): FinancingResult {
   return {
     loanAmount,
     monthlyPayment,
+    auctioneerFee,
     totalCashInvested,
     totalHoldingCosts,
     totalCostAtSale,

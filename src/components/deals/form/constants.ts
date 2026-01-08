@@ -22,6 +22,7 @@ export const PROPERTY_CONDITION_VALUES: (Exclude<PropertyCondition, null>)[] = [
 export const ACQUISITION_TYPE_VALUES: AcquisitionType[] = [
   "TRADITIONAL",
   "AUCTION",
+  "AUCTION_NO_FEE",
 ];
 
 // Translation keys for property types
@@ -46,6 +47,7 @@ export const PROPERTY_CONDITION_KEYS: Record<Exclude<PropertyCondition, null>, s
 export const ACQUISITION_TYPE_KEYS: Record<AcquisitionType, string> = {
   TRADITIONAL: "deal.acquisitionType.traditional",
   AUCTION: "deal.acquisitionType.auction",
+  AUCTION_NO_FEE: "deal.acquisitionType.auctionNoFee",
 };
 
 // Default form values

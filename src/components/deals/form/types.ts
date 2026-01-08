@@ -8,7 +8,7 @@ export type PropertyType = "RESIDENTIAL" | "COMMERCIAL" | "LAND" | "INDUSTRIAL" 
 export type PropertyCondition = "NEW" | "EXCELLENT" | "GOOD" | "FAIR" | "NEEDS_WORK" | null;
 
 // Acquisition type values
-export type AcquisitionType = "TRADITIONAL" | "AUCTION";
+export type AcquisitionType = "TRADITIONAL" | "AUCTION" | "AUCTION_NO_FEE";
 
 // Document type values
 export type DocumentType = "PROPERTY_REGISTRY" | "AUCTION_NOTICE" | "CONTRACT" | "INSPECTION" | "OTHER";
@@ -62,6 +62,7 @@ export interface DealFormValues {
 export interface DealMetrics {
   loanAmount: number;
   monthlyPayment: number;
+  auctioneerFee: number;       // Comissão do leiloeiro (5%)
   totalCashInvested: number;
   totalHoldingCosts: number;
   grossProceeds: number;
@@ -102,6 +103,7 @@ export interface PreviewPanelProps {
     downPayment: number;
     closingCosts: number;
     isFirstProperty: boolean;
+    acquisitionType: AcquisitionType;
   };
   locale: LocaleCode;
   t: (key: string) => string;

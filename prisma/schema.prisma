@@ -103,8 +103,9 @@ enum PropertyCondition {
 
 // Tipo de aquisição
 enum AcquisitionType {
-  TRADITIONAL     // Mercado tradicional
-  AUCTION         // Leilão
+  TRADITIONAL         // Mercado tradicional
+  AUCTION             // Leilão com leiloeiro (5% de comissão)
+  AUCTION_NO_FEE      // Leilão sem leiloeiro (Caixa, bancos, etc)
 }
 
 // ==========================================

@@ -45,7 +45,7 @@ export function DealForm({ mode, dealId }: DealFormProps) {
 
   const useFinancing = watch("useFinancing") || false;
   const acquisitionType = watch("acquisitionType") || "TRADITIONAL";
-  const isAuction = acquisitionType === "AUCTION";
+  const isAuction = acquisitionType === "AUCTION" || acquisitionType === "AUCTION_NO_FEE";
 
   // Loading state for edit mode
   if (isLoading) {
@@ -77,6 +77,7 @@ export function DealForm({ mode, dealId }: DealFormProps) {
     downPayment: watch("downPayment") || 0,
     closingCosts: watch("closingCosts") || 0,
     isFirstProperty: watch("isFirstProperty") ?? true,
+    acquisitionType,
   };
 
   return (

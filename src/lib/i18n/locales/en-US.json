@@ -64,7 +64,8 @@
       "label": "Acquisition Type",
       "select": "Select type",
       "traditional": "Traditional Market",
-      "auction": "Auction"
+      "auction": "Auction (with auctioneer)",
+      "auctionNoFee": "Direct Auction (Bank REO)"
     },
     "estimatedSalePrice": "Estimated Sale Price",
     "timeline": "Timeline (months)",

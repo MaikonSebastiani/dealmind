@@ -17,7 +17,11 @@ export function PreviewPanel({ metrics, values, locale, t }: PreviewPanelProps) 
     downPayment, 
     closingCosts,
     isFirstProperty,
+    acquisitionType,
   } = values;
+
+  // Check if auctioneer fee applies (only for AUCTION, not AUCTION_NO_FEE)
+  const hasAuctioneerFee = acquisitionType === "AUCTION";
 
   return (
     <Card className="sticky top-6">
@@ -54,6 +58,12 @@ export function PreviewPanel({ metrics, values, locale, t }: PreviewPanelProps) 
                   <span>{fmt(propertyDebts)}</span>
                 </div>
               )}
+              {hasAuctioneerFee && metrics.auctioneerFee > 0 && (
+                <div className="flex justify-between text-sm text-amber-600">
+                  <span>{locale === "pt-BR" ? "Comissão Leiloeiro (5%)" : "Auctioneer Fee (5%)"}</span>
+                  <span>{fmt(metrics.auctioneerFee)}</span>
+                </div>
+              )}
             </>
           ) : (
             <>
@@ -69,6 +79,12 @@ export function PreviewPanel({ metrics, values, locale, t }: PreviewPanelProps) 
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">{t("deal.propertyDebts")}</span>
                   <span>{fmt(propertyDebts)}</span>
+                </div>
+              )}
+              {hasAuctioneerFee && metrics.auctioneerFee > 0 && (
+                <div className="flex justify-between text-sm text-amber-600">
+                  <span>{locale === "pt-BR" ? "Comissão Leiloeiro (5%)" : "Auctioneer Fee (5%)"}</span>
+                  <span>{fmt(metrics.auctioneerFee)}</span>
                 </div>
               )}
             </>

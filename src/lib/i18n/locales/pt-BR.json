@@ -64,7 +64,8 @@
       "label": "Tipo de Aquisição",
       "select": "Selecione o tipo",
       "traditional": "Mercado Tradicional",
-      "auction": "Leilão"
+      "auction": "Leilão (com leiloeiro)",
+      "auctionNoFee": "Leilão Direto (Caixa, Bancos)"
     },
     "estimatedSalePrice": "Preço de Venda Estimado",
     "timeline": "Prazo (meses)",
