@@ -39,6 +39,7 @@ export interface Deal {
   estimatedTimeMonths: number;
   isFirstProperty: boolean;
   useFinancing: boolean;
+  amortizationType: string;
   downPayment: number | null;
   loanAmount: number | null;
   interestRate: number | null;

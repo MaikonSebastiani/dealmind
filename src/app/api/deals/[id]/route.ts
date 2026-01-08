@@ -130,6 +130,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     const propertyDebts = data.propertyDebts ?? Number(existingDeal.propertyDebts || 0);
     const estimatedSalePrice = data.estimatedSalePrice ?? Number(existingDeal.estimatedSalePrice);
     const estimatedTimeMonths = data.estimatedTimeMonths ?? existingDeal.estimatedTimeMonths;
+    const acquisitionType = data.acquisitionType ?? existingDeal.acquisitionType ?? "TRADITIONAL";
     const isFirstProperty = data.isFirstProperty ?? existingDeal.isFirstProperty ?? false;
     const useFinancing = data.useFinancing ?? existingDeal.useFinancing;
     const amortizationType = data.amortizationType ?? existingDeal.amortizationType ?? "SAC";
@@ -146,6 +147,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
       propertyDebts,
       estimatedSalePrice,
       estimatedTimeMonths,
+      acquisitionType,
       useFinancing,
       amortizationType,
       downPayment,

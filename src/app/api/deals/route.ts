@@ -62,6 +62,7 @@ export async function POST(request: Request) {
       propertyDebts: data.propertyDebts || 0,
       estimatedSalePrice: data.estimatedSalePrice,
       estimatedTimeMonths: data.estimatedTimeMonths || 12,
+      acquisitionType: data.acquisitionType || "TRADITIONAL",
       useFinancing: data.useFinancing,
       amortizationType: data.amortizationType,
       downPayment: data.downPayment,
