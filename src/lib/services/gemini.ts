@@ -245,10 +245,21 @@ ${deal.hasPropertyRegistry ? `
 **PROPERTY REGISTRY (MATRÍCULA) - EXTRACT:**
 1. Registry Number (Número da Matrícula)
 2. Taxpayer Number (Número do Contribuinte/IPTU)
-3. Last Owner Name and CPF/CNPJ (before foreclosure/auction if applicable)
+3. **ONLY the LAST owner** (the debtor before foreclosure) - Name and CPF/CNPJ
+   - Do NOT list previous owners (they are irrelevant)
+   - We only need the debtor's info to check for pending debts
 4. Complete Property Address
 5. Property Area (m²)
 6. Registration Date
+
+**IMPORTANT ABOUT TRANSFER HISTORY:**
+- Do NOT list all previous owners chronologically
+- ONLY mention previous transfers IF they contain:
+  - Usufruct rights still active
+  - Bare ownership (nua propriedade) situations
+  - Clauses that could prevent transfer (inalienability, incommunicability)
+  - Other legal issues that affect the current transaction
+- If the transfer history is clean, leave "previousTransfers" as an empty array []
 
 **CRITICAL - CHECK FOR IMPEDIMENTS:**
 - Nua Propriedade (Bare Ownership) - ownership separated from usufruct
@@ -403,14 +414,14 @@ RESEARCH THE FOLLOWING and provide your analysis in JSON format (respond ONLY wi
     ${deal.hasPropertyRegistry ? `"propertyRegistry": {
       "registryNumber": "Registry number from document or null",
       "taxpayerNumber": "Taxpayer/IPTU number or null",
-      "lastOwnerName": "Name of last owner before foreclosure or null",
-      "lastOwnerCpf": "CPF/CNPJ of last owner or null",
+      "lastOwnerName": "ONLY the debtor's name (last owner before foreclosure) or null",
+      "lastOwnerCpf": "ONLY the debtor's CPF/CNPJ or null",
       "propertyAddress": "Full address from registry or null",
       "propertyArea": <area in m² as number or null>,
       "registrationDate": "Date of last registration or null",
       "encumbrances": ["List of ALL liens, mortgages, seizures found"],
       "restrictions": ["List of restrictions: usufruct, bare ownership, clauses"],
-      "previousTransfers": ["Brief history of ownership transfers"],
+      "previousTransfers": ["ONLY if there are legal issues affecting transfer - otherwise empty array []"],
       "alerts": ["Critical issues that may PREVENT or DELAY ownership transfer"]
     }` : ""}${deal.hasPropertyRegistry && deal.hasAuctionNotice ? "," : ""}
     ${deal.hasAuctionNotice ? `"auctionNotice": {
