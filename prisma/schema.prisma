@@ -108,6 +108,12 @@ enum AcquisitionType {
   AUCTION_NO_FEE      // Leilão sem leiloeiro (Caixa, bancos, etc)
 }
 
+// Tipo de amortização
+enum AmortizationType {
+  SAC                 // Sistema de Amortização Constante (parcelas decrescentes)
+  PRICE               // Tabela Price (parcelas fixas)
+}
+
 // ==========================================
 // DEAL MODEL
 // ==========================================
@@ -146,6 +152,7 @@ model Deal {
   
   // Financing (optional)
   useFinancing       Boolean      @default(false)
+  amortizationType   AmortizationType @default(SAC)
   downPayment        Decimal?     @db.Decimal(12, 2)
   loanAmount         Decimal?     @db.Decimal(12, 2)
   interestRate       Decimal?     @db.Decimal(5, 2)  // Annual rate %

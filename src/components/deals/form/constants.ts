@@ -1,4 +1,4 @@
-import type { PropertyType, PropertyCondition, AcquisitionType, DealFormValues } from "./types";
+import type { PropertyType, PropertyCondition, AcquisitionType, AmortizationType, DealFormValues } from "./types";
 
 // Property types configuration
 export const PROPERTY_TYPE_VALUES: PropertyType[] = [
@@ -50,6 +50,18 @@ export const ACQUISITION_TYPE_KEYS: Record<AcquisitionType, string> = {
   AUCTION_NO_FEE: "deal.acquisitionType.auctionNoFee",
 };
 
+// Amortization types configuration
+export const AMORTIZATION_TYPE_VALUES: AmortizationType[] = [
+  "PRICE",
+  "SAC",
+];
+
+// Translation keys for amortization types
+export const AMORTIZATION_TYPE_KEYS: Record<AmortizationType, string> = {
+  PRICE: "deal.financing.amortization.price",
+  SAC: "deal.financing.amortization.sac",
+};
+
 // Default form values
 export const getDefaultFormValues = (defaultInterestRate: number): DealFormValues => ({
   name: "",
@@ -77,6 +89,7 @@ export const getDefaultFormValues = (defaultInterestRate: number): DealFormValue
   isFirstProperty: false,
   // Financing
   useFinancing: false,
+  amortizationType: "SAC",
   downPayment: 0,
   interestRate: defaultInterestRate,
   loanTermYears: 30,

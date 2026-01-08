@@ -80,7 +80,12 @@
       "loanTerm": "Prazo (anos)",
       "monthlyPayment": "Parcela Mensal",
       "closingCosts": "Custos de Fechamento",
-      "closingCostsDescription": "ITBI, escritura, registro (0,5-5%)"
+      "closingCostsDescription": "ITBI, escritura, registro (0,5-5%)",
+      "amortization": {
+        "label": "Sistema de Amortização",
+        "sac": "SAC (Parcelas Decrescentes)",
+        "price": "PRICE (Parcelas Fixas)"
+      }
     },
     "notes": "Observações Adicionais",
     "notesPlaceholder": "Informações adicionais sobre este negócio...",

@@ -16,6 +16,7 @@ export interface FinancingInput {
   
   // Financing (optional)
   useFinancing?: boolean;
+  amortizationType?: "SAC" | "PRICE"; // Sistema de amortização
   downPayment?: number;
   interestRate?: number; // Annual rate (e.g., 7.5)
   loanTermYears?: number;
@@ -29,7 +30,17 @@ export interface FinancingInput {
 export interface FinancingResult {
   // Loan details
   loanAmount: number;
-  monthlyPayment: number;
+  monthlyPayment: number;           // Current payment (based on selected amortization)
+  
+  // SAC specific (parcelas decrescentes)
+  firstPaymentSAC: number;          // Primeira parcela SAC (mais alta)
+  lastPaymentSAC: number;           // Última parcela SAC (mais baixa)
+  
+  // Comparison metrics
+  monthlyPaymentPRICE: number;      // Parcela fixa PRICE
+  totalInterestSAC: number;         // Total de juros no SAC
+  totalInterestPRICE: number;       // Total de juros no PRICE
+  interestSavings: number;          // Economia SAC vs PRICE (positivo = SAC economiza)
   
   // Auction fees
   auctioneerFee: number; // Comissão do leiloeiro (5% for AUCTION, 0 for others)
@@ -47,8 +58,9 @@ export interface FinancingResult {
 }
 
 /**
- * Calculate monthly mortgage payment using PMT formula
+ * Calculate monthly mortgage payment using PMT formula (PRICE system)
  * P = L[c(1 + c)^n]/[(1 + c)^n – 1]
+ * Fixed payments throughout the loan term
  */
 export function calculateMonthlyPayment(
   loanAmount: number,
@@ -65,6 +77,105 @@ export function calculateMonthlyPayment(
     (Math.pow(1 + monthlyRate, numPayments) - 1);
   
   return isFinite(payment) ? Math.round(payment * 100) / 100 : 0;
+}
+
+/**
+ * SAC Payment Calculation Results
+ */
+export interface SACPaymentResult {
+  firstPayment: number;    // Primeira parcela (mais alta)
+  lastPayment: number;     // Última parcela (mais baixa)
+  amortization: number;    // Amortização mensal fixa
+  totalInterest: number;   // Total de juros pagos
+  averagePayment: number;  // Parcela média no período
+}
+
+/**
+ * Calculate SAC (Sistema de Amortização Constante) payments
+ * 
+ * SAC characteristics:
+ * - Fixed amortization (principal) each month
+ * - Decreasing interest as balance reduces
+ * - Decreasing total payment over time
+ * - Lower total interest compared to PRICE
+ * 
+ * Formula:
+ * - Amortization = Principal / Number of payments
+ * - Interest(n) = Remaining balance * Monthly rate
+ * - Payment(n) = Amortization + Interest(n)
+ */
+export function calculateSACPayments(
+  loanAmount: number,
+  annualRate: number,
+  termYears: number,
+  holdingPeriodMonths?: number
+): SACPaymentResult {
+  if (loanAmount <= 0 || annualRate <= 0 || termYears <= 0) {
+    return {
+      firstPayment: 0,
+      lastPayment: 0,
+      amortization: 0,
+      totalInterest: 0,
+      averagePayment: 0,
+    };
+  }
+  
+  const monthlyRate = annualRate / 100 / 12;
+  const numPayments = termYears * 12;
+  
+  // Amortização fixa mensal
+  const amortization = loanAmount / numPayments;
+  
+  // Primeira parcela (juros sobre saldo total)
+  const firstInterest = loanAmount * monthlyRate;
+  const firstPayment = amortization + firstInterest;
+  
+  // Última parcela (juros sobre última parcela de saldo)
+  const lastInterest = amortization * monthlyRate;
+  const lastPayment = amortization + lastInterest;
+  
+  // Total de juros SAC (soma de PA)
+  // Juros total = (n/2) * (primeiro_juros + último_juros)
+  const totalInterest = (numPayments / 2) * (firstInterest + lastInterest);
+  
+  // Parcela média no período de holding (para cálculo de custos)
+  // Se holdingPeriodMonths for fornecido, calcula a média das parcelas nesse período
+  let averagePayment = (firstPayment + lastPayment) / 2;
+  
+  if (holdingPeriodMonths && holdingPeriodMonths > 0 && holdingPeriodMonths < numPayments) {
+    // Calcular parcela média durante o período de holding
+    // Payment(n) = amortization + (loanAmount - (n-1) * amortization) * monthlyRate
+    let sumPayments = 0;
+    for (let n = 1; n <= holdingPeriodMonths; n++) {
+      const remainingBalance = loanAmount - (n - 1) * amortization;
+      const interest = remainingBalance * monthlyRate;
+      sumPayments += amortization + interest;
+    }
+    averagePayment = sumPayments / holdingPeriodMonths;
+  }
+  
+  return {
+    firstPayment: Math.round(firstPayment * 100) / 100,
+    lastPayment: Math.round(lastPayment * 100) / 100,
+    amortization: Math.round(amortization * 100) / 100,
+    totalInterest: Math.round(totalInterest * 100) / 100,
+    averagePayment: Math.round(averagePayment * 100) / 100,
+  };
+}
+
+/**
+ * Calculate total interest for PRICE system
+ * Total Interest = (Monthly Payment * Number of Payments) - Principal
+ */
+export function calculatePRICETotalInterest(
+  loanAmount: number,
+  annualRate: number,
+  termYears: number
+): number {
+  const monthlyPayment = calculateMonthlyPayment(loanAmount, annualRate, termYears);
+  const numPayments = termYears * 12;
+  const totalPaid = monthlyPayment * numPayments;
+  return Math.round((totalPaid - loanAmount) * 100) / 100;
 }
 
 /**
@@ -125,6 +236,7 @@ export function calculateDealMetrics(input: FinancingInput): FinancingResult {
     estimatedTimeMonths,
     acquisitionType = "TRADITIONAL",
     useFinancing = false,
+    amortizationType = "SAC",
     downPayment = 0,
     interestRate = 0,
     loanTermYears = 30,
@@ -143,9 +255,27 @@ export function calculateDealMetrics(input: FinancingInput): FinancingResult {
     ? Math.max(0, purchasePrice - downPayment) 
     : 0;
 
-  // Calculate monthly mortgage payment
-  const monthlyPayment = useFinancing 
+  // Calculate PRICE monthly payment (fixed)
+  const monthlyPaymentPRICE = useFinancing 
     ? calculateMonthlyPayment(loanAmount, interestRate, loanTermYears)
+    : 0;
+
+  // Calculate SAC payments (decreasing)
+  const sacPayments = useFinancing
+    ? calculateSACPayments(loanAmount, interestRate, loanTermYears, estimatedTimeMonths)
+    : { firstPayment: 0, lastPayment: 0, amortization: 0, totalInterest: 0, averagePayment: 0 };
+
+  // Total interest calculations for comparison
+  const totalInterestPRICE = useFinancing
+    ? calculatePRICETotalInterest(loanAmount, interestRate, loanTermYears)
+    : 0;
+  const totalInterestSAC = sacPayments.totalInterest;
+  const interestSavings = totalInterestPRICE - totalInterestSAC; // Positive = SAC saves money
+
+  // Select monthly payment based on amortization type
+  // For SAC, we use the average payment during holding period for more accurate cost projection
+  const monthlyPayment = useFinancing
+    ? (amortizationType === "SAC" ? sacPayments.averagePayment : monthlyPaymentPRICE)
     : 0;
 
   // Holding costs during investment period
@@ -184,6 +314,12 @@ export function calculateDealMetrics(input: FinancingInput): FinancingResult {
   return {
     loanAmount,
     monthlyPayment,
+    firstPaymentSAC: sacPayments.firstPayment,
+    lastPaymentSAC: sacPayments.lastPayment,
+    monthlyPaymentPRICE,
+    totalInterestSAC,
+    totalInterestPRICE,
+    interestSavings,
     auctioneerFee,
     totalCashInvested,
     totalHoldingCosts,

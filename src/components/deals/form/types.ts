@@ -10,6 +10,9 @@ export type PropertyCondition = "NEW" | "EXCELLENT" | "GOOD" | "FAIR" | "NEEDS_W
 // Acquisition type values
 export type AcquisitionType = "TRADITIONAL" | "AUCTION" | "AUCTION_NO_FEE";
 
+// Amortization type values (for financing)
+export type AmortizationType = "PRICE" | "SAC";
+
 // Document type values
 export type DocumentType = "PROPERTY_REGISTRY" | "AUCTION_NOTICE" | "CONTRACT" | "INSPECTION" | "OTHER";
 
@@ -50,6 +53,7 @@ export interface DealFormValues {
   isFirstProperty: boolean;
   // Financing
   useFinancing: boolean;
+  amortizationType: AmortizationType;
   downPayment: number;
   interestRate: number;
   loanTermYears: number;
@@ -61,8 +65,14 @@ export interface DealFormValues {
 // Deal metrics from calculations
 export interface DealMetrics {
   loanAmount: number;
-  monthlyPayment: number;
-  auctioneerFee: number;       // Comissão do leiloeiro (5%)
+  monthlyPayment: number;          // Parcela atual (SAC ou PRICE)
+  firstPaymentSAC: number;         // Primeira parcela SAC
+  lastPaymentSAC: number;          // Última parcela SAC
+  monthlyPaymentPRICE: number;     // Parcela fixa PRICE (para comparação)
+  totalInterestSAC: number;        // Total de juros SAC
+  totalInterestPRICE: number;      // Total de juros PRICE
+  interestSavings: number;         // Economia de juros SAC vs PRICE
+  auctioneerFee: number;           // Comissão do leiloeiro (5%)
   totalCashInvested: number;
   totalHoldingCosts: number;
   grossProceeds: number;
@@ -143,6 +153,7 @@ export interface DealResponse {
     estimatedTimeMonths: number;
     isFirstProperty: boolean;
     useFinancing: boolean;
+    amortizationType: AmortizationType;
     downPayment: number | null;
     interestRate: number | null;
     loanTermYears: number | null;

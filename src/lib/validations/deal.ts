@@ -26,7 +26,10 @@ const optionalYear = z.preprocess(
 );
 
 // Acquisition type enum
-const AcquisitionTypeEnum = z.enum(["TRADITIONAL", "AUCTION"]);
+const AcquisitionTypeEnum = z.enum(["TRADITIONAL", "AUCTION", "AUCTION_NO_FEE"]);
+
+// Amortization type enum
+const AmortizationTypeEnum = z.enum(["SAC", "PRICE"]);
 
 // Base schema without refinements
 const baseDealSchema = z.object({
@@ -101,6 +104,7 @@ const baseDealSchema = z.object({
   
   // Financing fields (optional)
   useFinancing: z.boolean().default(false),
+  amortizationType: AmortizationTypeEnum.default("SAC"),
   downPayment: z
     .number()
     .min(0, "Down payment cannot be negative")

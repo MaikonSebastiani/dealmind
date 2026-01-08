@@ -80,7 +80,12 @@
       "loanTerm": "Loan Term (years)",
       "monthlyPayment": "Monthly Payment",
       "closingCosts": "Closing Costs",
-      "closingCostsDescription": "Title, escrow, origination fees (2-5%)"
+      "closingCostsDescription": "Title, escrow, origination fees (2-5%)",
+      "amortization": {
+        "label": "Amortization Type",
+        "sac": "SAC (Decreasing Payments)",
+        "price": "PRICE (Fixed Payments)"
+      }
     },
     "notes": "Additional Notes",
     "notesPlaceholder": "Any additional information about this deal...",

@@ -63,6 +63,7 @@ export async function POST(request: Request) {
       estimatedSalePrice: data.estimatedSalePrice,
       estimatedTimeMonths: data.estimatedTimeMonths || 12,
       useFinancing: data.useFinancing,
+      amortizationType: data.amortizationType,
       downPayment: data.downPayment,
       interestRate: data.interestRate,
       loanTermYears: data.loanTermYears,
@@ -102,6 +103,7 @@ export async function POST(request: Request) {
           isFirstProperty: data.isFirstProperty ?? true,
           // Financing fields
           useFinancing: data.useFinancing ?? false,
+          amortizationType: data.amortizationType || "SAC",
           downPayment: data.useFinancing ? data.downPayment : null,
           loanAmount: data.useFinancing ? metrics.loanAmount : null,
           interestRate: data.useFinancing ? data.interestRate : null,
