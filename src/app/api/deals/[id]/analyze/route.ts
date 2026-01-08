@@ -45,11 +45,14 @@ export async function POST(request: Request, { params }: RouteParams) {
 
     const { id } = await params;
 
-    // Get deal with ownership check
+    // Get deal with ownership check and documents
     const deal = await prisma.deal.findFirst({
       where: {
         id,
         userId: session.user.id,
+      },
+      include: {
+        documents: true,
       },
     });
 
@@ -71,6 +74,29 @@ export async function POST(request: Request, { params }: RouteParams) {
     // Get locale from request body
     const body = await request.json().catch(() => ({}));
     const locale = body.locale || "en-US";
+
+    // Separate documents by type
+    const propertyRegistry = deal.documents.find(d => d.type === "PROPERTY_REGISTRY");
+    const auctionNotice = deal.documents.find(d => d.type === "AUCTION_NOTICE");
+
+    // Fetch document contents for AI analysis
+    const documents: Array<{ type: string; url: string; name: string }> = [];
+    
+    if (propertyRegistry) {
+      documents.push({
+        type: "PROPERTY_REGISTRY",
+        url: propertyRegistry.url,
+        name: propertyRegistry.name,
+      });
+    }
+    
+    if (auctionNotice) {
+      documents.push({
+        type: "AUCTION_NOTICE", 
+        url: auctionNotice.url,
+        name: auctionNotice.name,
+      });
+    }
 
     // Prepare deal data for analysis
     const dealForAnalysis: DealForAnalysis = {
@@ -101,6 +127,10 @@ export async function POST(request: Request, { params }: RouteParams) {
       interestRate: deal.interestRate ? Number(deal.interestRate) : null,
       loanTermYears: deal.loanTermYears,
       closingCosts: deal.closingCosts ? Number(deal.closingCosts) : null,
+      // Documents
+      hasPropertyRegistry: !!propertyRegistry,
+      hasAuctionNotice: !!auctionNotice,
+      documents,
     };
 
     // Run AI analysis
@@ -169,6 +199,7 @@ export async function POST(request: Request, { params }: RouteParams) {
         questionsToAsk: analysisResult.questionsToAsk,
         hiddenCosts: analysisResult.hiddenCosts,
         alerts: analysisResult.alerts,
+        documentExtractions: analysisResult.documentExtractions,
       },
     }, { headers: getRateLimitHeaders(rateLimit) });
 

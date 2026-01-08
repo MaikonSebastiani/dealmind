@@ -18,7 +18,15 @@ import {
   HelpCircle,
   DollarSign,
   Info,
-  ClipboardCheck
+  ClipboardCheck,
+  FileText,
+  Gavel,
+  User,
+  Home,
+  Calendar,
+  CreditCard,
+  ShieldAlert,
+  Ban
 } from "lucide-react";
 import { formatCurrency } from "@/lib/i18n/currency";
 import type { LocaleCode } from "@/contexts/locale-context";
@@ -65,6 +73,41 @@ interface HiddenCost {
   estimatedRange: string;
 }
 
+interface PropertyRegistryExtraction {
+  registryNumber?: string;
+  taxpayerNumber?: string;
+  lastOwnerName?: string;
+  lastOwnerCpf?: string;
+  propertyAddress?: string;
+  propertyArea?: number;
+  registrationDate?: string;
+  encumbrances: string[];
+  restrictions: string[];
+  previousTransfers: string[];
+  alerts: string[];
+}
+
+interface AuctionNoticeExtraction {
+  auctioneerName?: string;
+  auctionDates?: string[];
+  minimumBid?: number;
+  appraisalValue?: number;
+  paymentMethods: string[];
+  paymentDeadlines: string[];
+  auctioneerFee?: string;
+  propertyDebts?: string[];
+  occupationStatus?: string;
+  evictionResponsibility?: string;
+  importantClauses: string[];
+  penaltiesAndFines: string[];
+  alerts: string[];
+}
+
+interface DocumentExtractions {
+  propertyRegistry?: PropertyRegistryExtraction;
+  auctionNotice?: AuctionNoticeExtraction;
+}
+
 interface Analysis {
   id: string;
   summary: string;
@@ -82,6 +125,7 @@ interface Analysis {
   questionsToAsk?: string[];
   hiddenCosts?: HiddenCost[];
   alerts?: string[];
+  documentExtractions?: DocumentExtractions;
   createdAt?: string;
 }
 
@@ -679,6 +723,359 @@ export function AIAnalysisSection({ dealId, dealStatus, locale, t }: AIAnalysisS
             </ul>
           </CardContent>
         </Card>
+      )}
+
+      {/* Document Extractions */}
+      {analysis.documentExtractions && (
+        <>
+          {/* Property Registry Extraction */}
+          {analysis.documentExtractions.propertyRegistry && (
+            <Card className="border-blue-200">
+              <CardHeader className="bg-blue-50/50">
+                <CardTitle className="flex items-center gap-2 text-blue-800">
+                  <FileText className="h-5 w-5" aria-hidden="true" />
+                  {locale === "pt-BR" ? "📋 Dados Extraídos da Matrícula" : "📋 Property Registry Data"}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4 pt-4">
+                {/* Basic Info */}
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {analysis.documentExtractions.propertyRegistry.registryNumber && (
+                    <div className="p-3 rounded-lg bg-muted/50">
+                      <p className="text-xs text-muted-foreground mb-1">
+                        {locale === "pt-BR" ? "Nº da Matrícula" : "Registry Number"}
+                      </p>
+                      <p className="font-semibold">{analysis.documentExtractions.propertyRegistry.registryNumber}</p>
+                    </div>
+                  )}
+                  {analysis.documentExtractions.propertyRegistry.taxpayerNumber && (
+                    <div className="p-3 rounded-lg bg-muted/50">
+                      <p className="text-xs text-muted-foreground mb-1">
+                        {locale === "pt-BR" ? "Nº do Contribuinte (IPTU)" : "Taxpayer Number"}
+                      </p>
+                      <p className="font-semibold">{analysis.documentExtractions.propertyRegistry.taxpayerNumber}</p>
+                    </div>
+                  )}
+                  {analysis.documentExtractions.propertyRegistry.propertyArea && (
+                    <div className="p-3 rounded-lg bg-muted/50">
+                      <p className="text-xs text-muted-foreground mb-1">
+                        {locale === "pt-BR" ? "Área" : "Area"}
+                      </p>
+                      <p className="font-semibold">{analysis.documentExtractions.propertyRegistry.propertyArea} m²</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Last Owner Info */}
+                {(analysis.documentExtractions.propertyRegistry.lastOwnerName || 
+                  analysis.documentExtractions.propertyRegistry.lastOwnerCpf) && (
+                  <div className="p-4 rounded-lg bg-amber-50/50 border border-amber-200">
+                    <h4 className="font-semibold text-amber-800 mb-2 flex items-center gap-2">
+                      <User className="h-4 w-4" />
+                      {locale === "pt-BR" ? "Último Proprietário (antes da retomada)" : "Last Owner (before foreclosure)"}
+                    </h4>
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      {analysis.documentExtractions.propertyRegistry.lastOwnerName && (
+                        <div>
+                          <p className="text-xs text-muted-foreground">{locale === "pt-BR" ? "Nome" : "Name"}</p>
+                          <p className="font-medium">{analysis.documentExtractions.propertyRegistry.lastOwnerName}</p>
+                        </div>
+                      )}
+                      {analysis.documentExtractions.propertyRegistry.lastOwnerCpf && (
+                        <div>
+                          <p className="text-xs text-muted-foreground">CPF/CNPJ</p>
+                          <p className="font-medium">{analysis.documentExtractions.propertyRegistry.lastOwnerCpf}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Property Address */}
+                {analysis.documentExtractions.propertyRegistry.propertyAddress && (
+                  <div className="p-3 rounded-lg bg-muted/50 flex items-start gap-3">
+                    <Home className="h-4 w-4 text-muted-foreground mt-0.5" />
+                    <div>
+                      <p className="text-xs text-muted-foreground mb-1">
+                        {locale === "pt-BR" ? "Endereço Completo" : "Full Address"}
+                      </p>
+                      <p className="text-sm">{analysis.documentExtractions.propertyRegistry.propertyAddress}</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Encumbrances (Ônus) - CRITICAL */}
+                {analysis.documentExtractions.propertyRegistry.encumbrances && 
+                 analysis.documentExtractions.propertyRegistry.encumbrances.length > 0 && (
+                  <div className="p-4 rounded-lg bg-red-50 border-2 border-red-300">
+                    <h4 className="font-semibold text-red-800 mb-3 flex items-center gap-2">
+                      <ShieldAlert className="h-5 w-5" />
+                      {locale === "pt-BR" ? "⚠️ Ônus e Gravames Encontrados" : "⚠️ Encumbrances Found"}
+                    </h4>
+                    <ul className="space-y-2">
+                      {analysis.documentExtractions.propertyRegistry.encumbrances.map((item, index) => (
+                        <li key={index} className="flex items-start gap-2 text-sm text-red-900">
+                          <AlertTriangle className="h-4 w-4 text-red-600 flex-shrink-0 mt-0.5" />
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Restrictions - CRITICAL */}
+                {analysis.documentExtractions.propertyRegistry.restrictions && 
+                 analysis.documentExtractions.propertyRegistry.restrictions.length > 0 && (
+                  <div className="p-4 rounded-lg bg-orange-50 border-2 border-orange-300">
+                    <h4 className="font-semibold text-orange-800 mb-3 flex items-center gap-2">
+                      <Ban className="h-5 w-5" />
+                      {locale === "pt-BR" ? "🚫 Restrições Encontradas" : "🚫 Restrictions Found"}
+                    </h4>
+                    <p className="text-xs text-orange-700 mb-2">
+                      {locale === "pt-BR" 
+                        ? "Nua propriedade, usufruto, cláusulas restritivas podem IMPEDIR a transferência"
+                        : "Bare ownership, usufruct, restrictive clauses may PREVENT transfer"}
+                    </p>
+                    <ul className="space-y-2">
+                      {analysis.documentExtractions.propertyRegistry.restrictions.map((item, index) => (
+                        <li key={index} className="flex items-start gap-2 text-sm text-orange-900">
+                          <Ban className="h-4 w-4 text-orange-600 flex-shrink-0 mt-0.5" />
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Previous Transfers */}
+                {analysis.documentExtractions.propertyRegistry.previousTransfers && 
+                 analysis.documentExtractions.propertyRegistry.previousTransfers.length > 0 && (
+                  <div className="p-4 rounded-lg bg-muted/30">
+                    <h4 className="font-semibold mb-2 flex items-center gap-2">
+                      <Calendar className="h-4 w-4" />
+                      {locale === "pt-BR" ? "Histórico de Transferências" : "Transfer History"}
+                    </h4>
+                    <ul className="space-y-1">
+                      {analysis.documentExtractions.propertyRegistry.previousTransfers.map((item, index) => (
+                        <li key={index} className="text-sm text-muted-foreground">• {item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Registry Alerts */}
+                {analysis.documentExtractions.propertyRegistry.alerts && 
+                 analysis.documentExtractions.propertyRegistry.alerts.length > 0 && (
+                  <div className="p-4 rounded-lg bg-red-100 border border-red-300">
+                    <h4 className="font-semibold text-red-800 mb-2">
+                      {locale === "pt-BR" ? "🚨 Alertas Críticos da Matrícula" : "🚨 Critical Registry Alerts"}
+                    </h4>
+                    <ul className="space-y-2">
+                      {analysis.documentExtractions.propertyRegistry.alerts.map((alert, index) => (
+                        <li key={index} className="flex items-start gap-2 text-sm text-red-900 font-medium">
+                          <AlertTriangle className="h-4 w-4 text-red-600 flex-shrink-0 mt-0.5" />
+                          <span>{alert}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Auction Notice Extraction */}
+          {analysis.documentExtractions.auctionNotice && (
+            <Card className="border-purple-200">
+              <CardHeader className="bg-purple-50/50">
+                <CardTitle className="flex items-center gap-2 text-purple-800">
+                  <Gavel className="h-5 w-5" aria-hidden="true" />
+                  {locale === "pt-BR" ? "📜 Dados Extraídos do Edital" : "📜 Auction Notice Data"}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4 pt-4">
+                {/* Basic Auction Info */}
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {analysis.documentExtractions.auctionNotice.minimumBid && (
+                    <div className="p-3 rounded-lg bg-green-50 border border-green-200">
+                      <p className="text-xs text-green-700 mb-1">
+                        {locale === "pt-BR" ? "Lance Mínimo" : "Minimum Bid"}
+                      </p>
+                      <p className="font-bold text-green-800 text-lg">{fmt(analysis.documentExtractions.auctionNotice.minimumBid)}</p>
+                    </div>
+                  )}
+                  {analysis.documentExtractions.auctionNotice.appraisalValue && (
+                    <div className="p-3 rounded-lg bg-blue-50 border border-blue-200">
+                      <p className="text-xs text-blue-700 mb-1">
+                        {locale === "pt-BR" ? "Valor de Avaliação" : "Appraisal Value"}
+                      </p>
+                      <p className="font-bold text-blue-800 text-lg">{fmt(analysis.documentExtractions.auctionNotice.appraisalValue)}</p>
+                    </div>
+                  )}
+                  {analysis.documentExtractions.auctionNotice.auctioneerFee && (
+                    <div className="p-3 rounded-lg bg-amber-50 border border-amber-200">
+                      <p className="text-xs text-amber-700 mb-1">
+                        {locale === "pt-BR" ? "Comissão do Leiloeiro" : "Auctioneer Fee"}
+                      </p>
+                      <p className="font-bold text-amber-800">{analysis.documentExtractions.auctionNotice.auctioneerFee}</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Auctioneer and Dates */}
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {analysis.documentExtractions.auctionNotice.auctioneerName && (
+                    <div className="p-3 rounded-lg bg-muted/50">
+                      <p className="text-xs text-muted-foreground mb-1">
+                        {locale === "pt-BR" ? "Leiloeiro" : "Auctioneer"}
+                      </p>
+                      <p className="font-medium">{analysis.documentExtractions.auctionNotice.auctioneerName}</p>
+                    </div>
+                  )}
+                  {analysis.documentExtractions.auctionNotice.auctionDates && 
+                   analysis.documentExtractions.auctionNotice.auctionDates.length > 0 && (
+                    <div className="p-3 rounded-lg bg-muted/50">
+                      <p className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
+                        <Calendar className="h-3 w-3" />
+                        {locale === "pt-BR" ? "Datas do Leilão" : "Auction Dates"}
+                      </p>
+                      <div className="space-y-1">
+                        {analysis.documentExtractions.auctionNotice.auctionDates.map((date, index) => (
+                          <p key={index} className="font-medium text-sm">
+                            {index === 0 ? "1ª Praça: " : "2ª Praça: "}{date}
+                          </p>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Occupation Status - CRITICAL */}
+                {analysis.documentExtractions.auctionNotice.occupationStatus && (
+                  <div className={`p-4 rounded-lg border-2 ${
+                    analysis.documentExtractions.auctionNotice.occupationStatus.toLowerCase().includes("ocupado") ||
+                    analysis.documentExtractions.auctionNotice.occupationStatus.toLowerCase().includes("occupied")
+                      ? "bg-red-50 border-red-300"
+                      : "bg-green-50 border-green-300"
+                  }`}>
+                    <h4 className={`font-semibold mb-2 flex items-center gap-2 ${
+                      analysis.documentExtractions.auctionNotice.occupationStatus.toLowerCase().includes("ocupado") ||
+                      analysis.documentExtractions.auctionNotice.occupationStatus.toLowerCase().includes("occupied")
+                        ? "text-red-800"
+                        : "text-green-800"
+                    }`}>
+                      <Home className="h-4 w-4" />
+                      {locale === "pt-BR" ? "Situação de Ocupação" : "Occupation Status"}
+                    </h4>
+                    <p className="font-bold">{analysis.documentExtractions.auctionNotice.occupationStatus}</p>
+                    {analysis.documentExtractions.auctionNotice.evictionResponsibility && (
+                      <p className="text-sm mt-2">
+                        <strong>{locale === "pt-BR" ? "Responsável pela desocupação:" : "Eviction responsibility:"}</strong>{" "}
+                        {analysis.documentExtractions.auctionNotice.evictionResponsibility}
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {/* Payment Methods */}
+                {analysis.documentExtractions.auctionNotice.paymentMethods && 
+                 analysis.documentExtractions.auctionNotice.paymentMethods.length > 0 && (
+                  <div className="p-4 rounded-lg bg-muted/30">
+                    <h4 className="font-semibold mb-2 flex items-center gap-2">
+                      <CreditCard className="h-4 w-4" />
+                      {locale === "pt-BR" ? "Formas de Pagamento" : "Payment Methods"}
+                    </h4>
+                    <div className="flex flex-wrap gap-2">
+                      {analysis.documentExtractions.auctionNotice.paymentMethods.map((method, index) => (
+                        <Badge key={index} variant="secondary">{method}</Badge>
+                      ))}
+                    </div>
+                    {analysis.documentExtractions.auctionNotice.paymentDeadlines && 
+                     analysis.documentExtractions.auctionNotice.paymentDeadlines.length > 0 && (
+                      <div className="mt-3">
+                        <p className="text-xs text-muted-foreground mb-1">
+                          {locale === "pt-BR" ? "Prazos:" : "Deadlines:"}
+                        </p>
+                        <ul className="space-y-1">
+                          {analysis.documentExtractions.auctionNotice.paymentDeadlines.map((deadline, index) => (
+                            <li key={index} className="text-sm">• {deadline}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Property Debts */}
+                {analysis.documentExtractions.auctionNotice.propertyDebts && 
+                 analysis.documentExtractions.auctionNotice.propertyDebts.length > 0 && (
+                  <div className="p-4 rounded-lg bg-orange-50 border border-orange-200">
+                    <h4 className="font-semibold text-orange-800 mb-2 flex items-center gap-2">
+                      <DollarSign className="h-4 w-4" />
+                      {locale === "pt-BR" ? "Dívidas Mencionadas" : "Property Debts Mentioned"}
+                    </h4>
+                    <ul className="space-y-1">
+                      {analysis.documentExtractions.auctionNotice.propertyDebts.map((debt, index) => (
+                        <li key={index} className="text-sm text-orange-900">• {debt}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Important Clauses */}
+                {analysis.documentExtractions.auctionNotice.importantClauses && 
+                 analysis.documentExtractions.auctionNotice.importantClauses.length > 0 && (
+                  <div className="p-4 rounded-lg bg-blue-50/50 border border-blue-200">
+                    <h4 className="font-semibold text-blue-800 mb-2">
+                      {locale === "pt-BR" ? "📌 Cláusulas Importantes" : "📌 Important Clauses"}
+                    </h4>
+                    <ul className="space-y-2">
+                      {analysis.documentExtractions.auctionNotice.importantClauses.map((clause, index) => (
+                        <li key={index} className="flex items-start gap-2 text-sm">
+                          <CheckCircle2 className="h-4 w-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                          <span>{clause}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Penalties and Fines */}
+                {analysis.documentExtractions.auctionNotice.penaltiesAndFines && 
+                 analysis.documentExtractions.auctionNotice.penaltiesAndFines.length > 0 && (
+                  <div className="p-4 rounded-lg bg-red-50/50 border border-red-200">
+                    <h4 className="font-semibold text-red-800 mb-2">
+                      {locale === "pt-BR" ? "⚖️ Multas e Penalidades" : "⚖️ Penalties and Fines"}
+                    </h4>
+                    <ul className="space-y-1">
+                      {analysis.documentExtractions.auctionNotice.penaltiesAndFines.map((penalty, index) => (
+                        <li key={index} className="text-sm text-red-900">• {penalty}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Auction Alerts */}
+                {analysis.documentExtractions.auctionNotice.alerts && 
+                 analysis.documentExtractions.auctionNotice.alerts.length > 0 && (
+                  <div className="p-4 rounded-lg bg-red-100 border border-red-300">
+                    <h4 className="font-semibold text-red-800 mb-2">
+                      {locale === "pt-BR" ? "🚨 Alertas do Edital" : "🚨 Auction Notice Alerts"}
+                    </h4>
+                    <ul className="space-y-2">
+                      {analysis.documentExtractions.auctionNotice.alerts.map((alert, index) => (
+                        <li key={index} className="flex items-start gap-2 text-sm text-red-900 font-medium">
+                          <AlertTriangle className="h-4 w-4 text-red-600 flex-shrink-0 mt-0.5" />
+                          <span>{alert}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+        </>
       )}
 
       {/* Disclaimer */}

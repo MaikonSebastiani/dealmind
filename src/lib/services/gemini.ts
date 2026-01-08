@@ -4,10 +4,17 @@
  * https://ai.google.dev/
  */
 
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenerativeAI, Part } from "@google/generative-ai";
 
 // Initialize Gemini client
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
+
+// Document for analysis
+export interface DocumentForAnalysis {
+  type: string;
+  url: string;
+  name: string;
+}
 
 // Types for deal analysis
 export interface DealForAnalysis {
@@ -41,6 +48,7 @@ export interface DealForAnalysis {
   // Documents
   hasPropertyRegistry?: boolean;
   hasAuctionNotice?: boolean;
+  documents?: DocumentForAnalysis[];
 }
 
 export interface AnalysisResult {
@@ -59,6 +67,7 @@ export interface AnalysisResult {
   questionsToAsk: string[];
   hiddenCosts: HiddenCost[];
   alerts: string[];
+  documentExtractions?: DocumentExtractions;
 }
 
 export interface Risk {
@@ -103,10 +112,71 @@ export interface HiddenCost {
   estimatedRange: string;
 }
 
+// Document extraction types
+export interface PropertyRegistryExtraction {
+  registryNumber?: string;           // Número da matrícula
+  taxpayerNumber?: string;           // Número do contribuinte (IPTU)
+  lastOwnerName?: string;            // Nome do último proprietário
+  lastOwnerCpf?: string;             // CPF do último proprietário
+  propertyAddress?: string;          // Endereço completo
+  propertyArea?: number;             // Área do imóvel
+  registrationDate?: string;         // Data do registro
+  encumbrances: string[];            // Ônus e gravames (hipoteca, penhora, etc)
+  restrictions: string[];            // Restrições (nua propriedade, usufruto, cláusulas)
+  previousTransfers: string[];       // Histórico de transferências
+  alerts: string[];                  // Alertas importantes
+}
+
+export interface AuctionNoticeExtraction {
+  auctioneerName?: string;           // Nome do leiloeiro
+  auctionDates?: string[];           // Datas do leilão (1ª e 2ª praça)
+  minimumBid?: number;               // Lance mínimo
+  appraisalValue?: number;           // Valor de avaliação
+  paymentMethods: string[];          // Formas de pagamento
+  paymentDeadlines: string[];        // Prazos de pagamento
+  auctioneerFee?: string;            // Comissão do leiloeiro
+  propertyDebts?: string[];          // Dívidas mencionadas
+  occupationStatus?: string;         // Situação de ocupação
+  evictionResponsibility?: string;   // Responsável pela desocupação
+  importantClauses: string[];        // Cláusulas importantes
+  penaltiesAndFines: string[];       // Multas e penalidades
+  alerts: string[];                  // Alertas importantes
+}
+
+export interface DocumentExtractions {
+  propertyRegistry?: PropertyRegistryExtraction;
+  auctionNotice?: AuctionNoticeExtraction;
+}
+
+/**
+ * Fetch PDF document and convert to base64
+ */
+async function fetchDocumentAsBase64(url: string): Promise<{ data: string; mimeType: string } | null> {
+  try {
+    console.log("[Gemini] Fetching document:", url);
+    const response = await fetch(url);
+    
+    if (!response.ok) {
+      console.error("[Gemini] Failed to fetch document:", response.status);
+      return null;
+    }
+    
+    const arrayBuffer = await response.arrayBuffer();
+    const base64 = Buffer.from(arrayBuffer).toString("base64");
+    const contentType = response.headers.get("content-type") || "application/pdf";
+    
+    console.log("[Gemini] Document fetched successfully, size:", arrayBuffer.byteLength);
+    return { data: base64, mimeType: contentType };
+  } catch (error) {
+    console.error("[Gemini] Error fetching document:", error);
+    return null;
+  }
+}
+
 /**
  * Generate analysis prompt for Gemini
  */
-function generatePrompt(deal: DealForAnalysis, locale: string): string {
+function generatePrompt(deal: DealForAnalysis, locale: string, hasDocuments: boolean): string {
   const isBrazil = locale === "pt-BR";
   const currency = isBrazil ? "BRL" : "USD";
   const areaUnit = isBrazil ? "m²" : "sq ft";
@@ -164,9 +234,60 @@ ${isBrazil ? `- Capital Gains Tax: ${deal.isFirstProperty ? "EXEMPT (first prope
 - Estimated Net Profit (after taxes): ${currency} ${netProfit.toLocaleString()}
 
 === DOCUMENTS PROVIDED ===
-- Property Registry (Matrícula): ${deal.hasPropertyRegistry ? "Yes - ATTACHED" : "Not provided"}
-- Auction Notice (Edital): ${deal.hasAuctionNotice ? "Yes - ATTACHED" : isAuction ? "NOT PROVIDED - Important for auction" : "N/A"}
+- Property Registry (Matrícula): ${deal.hasPropertyRegistry ? "YES - ATTACHED FOR ANALYSIS" : "Not provided"}
+- Auction Notice (Edital): ${deal.hasAuctionNotice ? "YES - ATTACHED FOR ANALYSIS" : isAuction ? "NOT PROVIDED - Important for auction" : "N/A"}
 `;
+
+  // Document extraction instructions
+  const documentExtractionInstructions = hasDocuments ? `
+=== DOCUMENT ANALYSIS INSTRUCTIONS ===
+${deal.hasPropertyRegistry ? `
+**PROPERTY REGISTRY (MATRÍCULA) - EXTRACT:**
+1. Registry Number (Número da Matrícula)
+2. Taxpayer Number (Número do Contribuinte/IPTU)
+3. Last Owner Name and CPF/CNPJ (before foreclosure/auction if applicable)
+4. Complete Property Address
+5. Property Area (m²)
+6. Registration Date
+
+**CRITICAL - CHECK FOR IMPEDIMENTS:**
+- Nua Propriedade (Bare Ownership) - ownership separated from usufruct
+- Usufruto (Usufruct) - right to use property belongs to another
+- Hipoteca (Mortgage) - existing liens
+- Penhora (Seizure/Lien) - judicial attachments
+- Alienação Fiduciária (Fiduciary Alienation) - property as collateral
+- Indisponibilidade (Unavailability) - judicial blocks
+- Servidão (Easement) - rights of way
+- Cláusulas Restritivas (Restrictive Clauses) - inalienability, incommunicability
+- Ações Judiciais (Lawsuits) - pending litigation
+
+List ALL encumbrances found, even if they seem resolved.
+` : ""}
+${deal.hasAuctionNotice ? `
+**AUCTION NOTICE (EDITAL) - EXTRACT:**
+1. Auctioneer Name and Registration
+2. Auction Dates (1st and 2nd round/praça)
+3. Minimum Bid (Lance Mínimo)
+4. Appraisal Value (Valor de Avaliação)
+5. Payment Methods and Deadlines
+6. Auctioneer Fee/Commission (usually 5%)
+7. Mentioned Property Debts (IPTU, condominium, utilities)
+8. Occupation Status (occupied/vacant)
+9. Who is responsible for eviction (buyer or seller)
+10. Important Clauses and Conditions
+11. Penalties for non-compliance
+12. Any special conditions or restrictions
+
+**RED FLAGS TO LOOK FOR:**
+- Unclear debt responsibility
+- No mention of occupation status
+- Short payment deadlines
+- High auctioneer fees (>5%)
+- Complex eviction clauses
+- Hidden costs or fees
+` : ""}
+` : "";
+
 
   const auctionSpecificGuidelines = isAuction ? `
 AUCTION-SPECIFIC GUIDELINES:
@@ -183,6 +304,7 @@ AUCTION-SPECIFIC GUIDELINES:
 Your role is to INFORM with data and observations, NOT to make investment decisions. The final decision always belongs to the investor.
 
 ${propertyInfo}
+${documentExtractionInstructions}
 
 RESEARCH THE FOLLOWING and provide your analysis in JSON format (respond ONLY with valid JSON, no markdown):
 
@@ -255,7 +377,37 @@ RESEARCH THE FOLLOWING and provide your analysis in JSON format (respond ONLY wi
   ],
   "alerts": [
     "Important consideration or warning about this deal"
-  ]
+  ]${hasDocuments ? `,
+  "documentExtractions": {
+    ${deal.hasPropertyRegistry ? `"propertyRegistry": {
+      "registryNumber": "Registry number from document or null",
+      "taxpayerNumber": "Taxpayer/IPTU number or null",
+      "lastOwnerName": "Name of last owner before foreclosure or null",
+      "lastOwnerCpf": "CPF/CNPJ of last owner or null",
+      "propertyAddress": "Full address from registry or null",
+      "propertyArea": <area in m² as number or null>,
+      "registrationDate": "Date of last registration or null",
+      "encumbrances": ["List of ALL liens, mortgages, seizures found"],
+      "restrictions": ["List of restrictions: usufruct, bare ownership, clauses"],
+      "previousTransfers": ["Brief history of ownership transfers"],
+      "alerts": ["Critical issues that may PREVENT or DELAY ownership transfer"]
+    }` : ""}${deal.hasPropertyRegistry && deal.hasAuctionNotice ? "," : ""}
+    ${deal.hasAuctionNotice ? `"auctionNotice": {
+      "auctioneerName": "Auctioneer name and registration or null",
+      "auctionDates": ["1st round date", "2nd round date if applicable"],
+      "minimumBid": <minimum bid as number or null>,
+      "appraisalValue": <appraisal value as number or null>,
+      "paymentMethods": ["Cash", "Financing", "Installments", etc],
+      "paymentDeadlines": ["Deadline descriptions"],
+      "auctioneerFee": "Commission percentage/value or null",
+      "propertyDebts": ["Listed debts: IPTU, condo fees, etc"],
+      "occupationStatus": "Occupied/Vacant/Unknown",
+      "evictionResponsibility": "Buyer/Seller/Court or null",
+      "importantClauses": ["Key clauses buyer must know"],
+      "penaltiesAndFines": ["Penalties for default or non-compliance"],
+      "alerts": ["RED FLAGS or critical issues in the auction notice"]
+    }` : ""}
+  }` : ""}
 }
 
 RESEARCH GUIDELINES:
@@ -295,9 +447,36 @@ export async function analyzeDeal(
   try {
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
     
-    const prompt = generatePrompt(deal, locale);
+    // Check if we have documents to analyze
+    const hasDocuments = !!(deal.documents && deal.documents.length > 0);
+    const prompt = generatePrompt(deal, locale, hasDocuments);
     
-    const result = await model.generateContent(prompt);
+    // Build content parts for multimodal request
+    const parts: Part[] = [{ text: prompt }];
+    
+    // Fetch and add documents as inline data
+    if (deal.documents && deal.documents.length > 0) {
+      console.log("[Gemini] Processing", deal.documents.length, "documents for analysis");
+      
+      for (const doc of deal.documents) {
+        const docData = await fetchDocumentAsBase64(doc.url);
+        if (docData) {
+          console.log("[Gemini] Adding document:", doc.name, "type:", doc.type);
+          parts.push({
+            inlineData: {
+              data: docData.data,
+              mimeType: docData.mimeType,
+            },
+          });
+          // Add context about which document this is
+          parts.push({
+            text: `\n[Above is the ${doc.type === "PROPERTY_REGISTRY" ? "Property Registry (Matrícula)" : "Auction Notice (Edital)"} document: ${doc.name}]\n`,
+          });
+        }
+      }
+    }
+    
+    const result = await model.generateContent(parts);
     const response = await result.response;
     const text = response.text();
     
