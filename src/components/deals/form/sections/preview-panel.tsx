@@ -48,6 +48,12 @@ export function PreviewPanel({ metrics, values, locale, t }: PreviewPanelProps) 
                 <span className="text-muted-foreground">{t("deal.financing.closingCosts")}</span>
                 <span>{fmt(closingCosts)}</span>
               </div>
+              {propertyDebts > 0 && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">{t("deal.propertyDebts")}</span>
+                  <span>{fmt(propertyDebts)}</span>
+                </div>
+              )}
             </>
           ) : (
             <>
@@ -59,6 +65,12 @@ export function PreviewPanel({ metrics, values, locale, t }: PreviewPanelProps) 
                 <span className="text-muted-foreground">{t("preview.renovationCosts")}</span>
                 <span>{fmt(estimatedCosts)}</span>
               </div>
+              {propertyDebts > 0 && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">{t("deal.propertyDebts")}</span>
+                  <span>{fmt(propertyDebts)}</span>
+                </div>
+              )}
             </>
           )}
           
@@ -159,17 +171,6 @@ export function PreviewPanel({ metrics, values, locale, t }: PreviewPanelProps) 
             <div className="mt-3 pt-3 border-t border-border/50 flex items-start gap-2 text-xs text-amber-600">
               <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
               <span>* Consider capital gains taxes at sale</span>
-            </div>
-          )}
-
-          {/* Property debts warning */}
-          {propertyDebts > 0 && (
-            <div className="mt-2 flex items-start gap-2 text-xs text-muted-foreground">
-              <span>
-                {locale === "pt-BR" 
-                  ? `* Dívidas do imóvel: ${fmt(propertyDebts)} (incluídas no investimento)`
-                  : `* Property debts: ${fmt(propertyDebts)} (included in investment)`}
-              </span>
             </div>
           )}
         </div>
