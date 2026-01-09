@@ -77,7 +77,7 @@ export function DealForm({ mode, dealId }: DealFormProps) {
     estimatedTimeMonths: watch("estimatedTimeMonths") || 12,
     useFinancing,
     downPayment: watch("downPayment") || 0,
-    closingCosts: watch("closingCosts") || 0,
+    closingCostsPercent: watch("closingCosts") || 0,
     isFirstProperty: watch("isFirstProperty") ?? true,
     acquisitionType,
   };

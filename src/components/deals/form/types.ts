@@ -57,7 +57,7 @@ export interface DealFormValues {
   downPayment: number;
   interestRate: number;
   loanTermYears: number;
-  closingCosts: number;
+  closingCosts: number; // Percentual do ITBI (aplicado ao preço de compra)
   // Notes
   notes: string;
 }
@@ -111,7 +111,7 @@ export interface PreviewPanelProps {
     estimatedTimeMonths: number;
     useFinancing: boolean;
     downPayment: number;
-    closingCosts: number;
+    closingCostsPercent: number;
     isFirstProperty: boolean;
     acquisitionType: AcquisitionType;
   };

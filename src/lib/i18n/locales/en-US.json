@@ -80,7 +80,7 @@
       "loanTerm": "Loan Term (years)",
       "monthlyPayment": "Monthly Payment",
       "closingCosts": "Closing Costs",
-      "closingCostsDescription": "Title, escrow, origination fees (2-5%)",
+      "closingCostsDescription": "ITBI percentage of the purchase price",
       "amortization": {
         "label": "Amortization Type",
         "sac": "SAC (Decreasing Payments)",

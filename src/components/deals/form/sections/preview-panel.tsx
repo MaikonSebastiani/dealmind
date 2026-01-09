@@ -15,10 +15,12 @@ export function PreviewPanel({ metrics, values, locale, t }: PreviewPanelProps) 
     estimatedTimeMonths, 
     useFinancing, 
     downPayment, 
-    closingCosts,
+    closingCostsPercent,
     isFirstProperty,
     acquisitionType,
   } = values;
+  const safeClosingCostsPercent = Number.isFinite(closingCostsPercent) ? closingCostsPercent : 0;
+  const closingCostsAmount = Math.round((purchasePrice * safeClosingCostsPercent / 100) * 100) / 100;
 
   // Check if auctioneer fee applies (only for AUCTION, not AUCTION_NO_FEE)
   const hasAuctioneerFee = acquisitionType === "AUCTION";
@@ -48,9 +50,14 @@ export function PreviewPanel({ metrics, values, locale, t }: PreviewPanelProps) 
                 <span className="text-muted-foreground">{t("deal.renovationCosts")}</span>
                 <span>{fmt(estimatedCosts)}</span>
               </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">{t("deal.financing.closingCosts")}</span>
-                <span>{fmt(closingCosts)}</span>
+              <div className="flex flex-col gap-0.5 text-sm">
+                <div className="flex justify-between items-baseline">
+                  <span className="text-muted-foreground flex items-center gap-1">
+                    {t("deal.financing.closingCosts")}
+                    <small className="text-xs text-muted-foreground">{`(${safeClosingCostsPercent.toFixed(1)}%)`}</small>
+                  </span>
+                  <span>{fmt(closingCostsAmount)}</span>
+                </div>
               </div>
               {propertyDebts > 0 && (
                 <div className="flex justify-between text-sm">

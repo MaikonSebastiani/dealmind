@@ -119,14 +119,21 @@ export function FinancingSection({
               </Select>
             </div>
 
-            <CurrencyInput
-              id="closingCosts"
-              label={t("deal.financing.closingCosts")}
-              locale={locale}
-              value={watch("closingCosts")}
-              onValueChange={(value) => setValue("closingCosts", value)}
-              description={t("deal.financing.closingCosts.description")}
-            />
+            <div className="space-y-1.5">
+              <Label htmlFor="closingCosts">{t("deal.financing.closingCosts")}</Label>
+              <div className="relative">
+                <input
+                  id="closingCosts"
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  className={`${INPUT_CLASS} pr-8`}
+                  {...register("closingCosts", { valueAsNumber: true })}
+                />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">%</span>
+              </div>
+              <p className="text-xs text-muted-foreground">{t("deal.financing.closingCosts.description")}</p>
+            </div>
 
             {/* Monthly Payment Display */}
             <div className="space-y-1.5">

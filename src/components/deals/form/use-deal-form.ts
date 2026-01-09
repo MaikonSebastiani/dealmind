@@ -71,21 +71,38 @@ export function useDealForm({ mode, dealId, documents = [] }: UseDealFormOptions
   const { watch, reset } = form;
 
   // Watch values for calculations
+  const purchasePrice = watch("purchasePrice") || 0;
+  const estimatedCosts = watch("estimatedCosts") || 0;
+  const monthlyExpenses = watch("monthlyExpenses") || 0;
+  const propertyDebts = watch("propertyDebts") || 0;
+  const estimatedSalePrice = watch("estimatedSalePrice") || 0;
+  const estimatedTimeMonths = watch("estimatedTimeMonths") || 12;
+  const acquisitionType = watch("acquisitionType") || "TRADITIONAL";
+  const useFinancing = watch("useFinancing") || false;
+  const amortizationType = watch("amortizationType") || "SAC";
+  const downPayment = watch("downPayment") || 0;
+  const interestRate = watch("interestRate") || defaultInterestRate;
+  const loanTermYears = watch("loanTermYears") || 30;
+  const closingCostsPercent = watch("closingCosts") || 0;
+  const isFirstProperty = watch("isFirstProperty") ?? false;
+
+  const closingCostsAmount = Math.round((purchasePrice * closingCostsPercent) / 100 * 100) / 100;
+
   const watchedValues = {
-    purchasePrice: watch("purchasePrice") || 0,
-    estimatedCosts: watch("estimatedCosts") || 0,
-    monthlyExpenses: watch("monthlyExpenses") || 0,
-    propertyDebts: watch("propertyDebts") || 0,
-    estimatedSalePrice: watch("estimatedSalePrice") || 0,
-    estimatedTimeMonths: watch("estimatedTimeMonths") || 12,
-    acquisitionType: watch("acquisitionType") || "TRADITIONAL",
-    useFinancing: watch("useFinancing") || false,
-    amortizationType: watch("amortizationType") || "SAC",
-    downPayment: watch("downPayment") || 0,
-    interestRate: watch("interestRate") || defaultInterestRate,
-    loanTermYears: watch("loanTermYears") || 30,
-    closingCosts: watch("closingCosts") || 0,
-    isFirstProperty: watch("isFirstProperty") ?? false,
+    purchasePrice,
+    estimatedCosts,
+    monthlyExpenses,
+    propertyDebts,
+    estimatedSalePrice,
+    estimatedTimeMonths,
+    acquisitionType,
+    useFinancing,
+    amortizationType,
+    downPayment,
+    interestRate,
+    loanTermYears,
+    closingCosts: closingCostsAmount,
+    isFirstProperty,
     locale,
   };
 
@@ -117,6 +134,12 @@ export function useDealForm({ mode, dealId, documents = [] }: UseDealFormOptions
         const data: DealResponse = await response.json();
         const deal = data.deal;
         
+        const purchasePriceValue = Number(deal.purchasePrice);
+        const savedClosingCosts = deal.closingCosts ? Number(deal.closingCosts) : 0;
+        const initialClosingCostsPercent = purchasePriceValue > 0
+          ? (savedClosingCosts / purchasePriceValue) * 100
+          : 0;
+
         reset({
           name: deal.name,
           address: deal.address || "",
@@ -145,7 +168,7 @@ export function useDealForm({ mode, dealId, documents = [] }: UseDealFormOptions
           downPayment: deal.downPayment ? Number(deal.downPayment) : 0,
           interestRate: deal.interestRate ? Number(deal.interestRate) : defaultInterestRate,
           loanTermYears: deal.loanTermYears || 30,
-          closingCosts: deal.closingCosts ? Number(deal.closingCosts) : 0,
+          closingCosts: Number.isFinite(initialClosingCostsPercent) ? initialClosingCostsPercent : 0,
           notes: deal.notes || "",
         });
 
@@ -181,8 +204,13 @@ export function useDealForm({ mode, dealId, documents = [] }: UseDealFormOptions
       const method = mode === "create" ? "POST" : "PATCH";
 
       // Prepare request body with documents
+      const closingCostsPercent = data.closingCosts ?? 0;
+      const purchasePriceValue = data.purchasePrice || 0;
+      const closingCostsAmount = Math.round((purchasePriceValue * closingCostsPercent / 100) * 100) / 100;
+
       const requestBody = {
         ...data,
+        closingCosts: closingCostsAmount,
         documents: documents.map(doc => ({
           name: doc.name,
           url: doc.url,
